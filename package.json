@@ -6,12 +6,13 @@
   "dependencies": {
     "typescript": "^4.5.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^16.11.12"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run tsc",
-    "run": "node ./build/index.js"
-
+    "build": "tsc",
+    "run": "npm run build && cd out && node ./index.js"
   },
   "repository": {
     "type": "git",
