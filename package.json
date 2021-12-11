@@ -1,0 +1,22 @@
+{
+  "name": "version-updater",
+  "version": "1.0.0",
+  "description": "version-updater",
+  "main": "index.js",
+  "dependencies": {
+    "typescript": "^4.5.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run tsc",
+    "run": "node ./build/index.js"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.facha.dev:FreeMCServer/version-updater.git"
+  },
+  "author": "Facha",
+  "license": "ISC"
+}
