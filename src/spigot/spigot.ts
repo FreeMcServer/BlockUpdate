@@ -5,27 +5,37 @@ import Utils from "../utils";
 import Version from "./version";
 import {execSync} from "child_process";
 
+let promiseFinally = require('promise.prototype.finally');
+promiseFinally.shim();
+
 
 // Spigot and Craftbukkit getter
 class Spigot {
     private bt: BuildTools;
-    public versions: Array<Version>;
+    public spigotVersions: Array<Version>;
+    public craftBukkitVersions: Array<Version>;
     private utils: Utils;
 
     constructor() {
+        if (!fs.existsSync("./out/spigot")) {
+            fs.mkdirSync("./out/spigot");
+        }
+        if (!fs.existsSync("./out/craftbukkit")) {
+            fs.mkdirSync("./out/craftbukkit");
+        }
         this.utils = new Utils;
         this.bt = new BuildTools();
-        this.versions = Spigot.getLocalVersions();
+        let versions = Spigot.getLocalVersions();
+        this.spigotVersions = versions.spigot;
+        this.craftBukkitVersions = versions.craftbukkit;
         this.updateVersions()
-        fs.writeFileSync('./out/spigot/versions.json', JSON.stringify(this.versions));
-
     }
 
     private updateVersions() {
          axios.get("https://hub.spigotmc.org/versions/").then(res => {
             let latestVersions: Array<string> = res.data.split("\n").filter((line: string) => line.startsWith("<a href=\"1.")).map((line: string) => line.split("\"")[1]).map((line: string) => line.replace('.json', '')).sort((a: string, b: string) => Utils.sortVersions(a, b) ? 1 : -1);
             for (const versionName of latestVersions) {
-                if (!this.versions.find((v: Version) => v.version === versionName)) {
+                if (!this.spigotVersions.find((v: Version) => v.version === versionName)) {
                     axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json").then(res => {
                         let json = res.data;
                         let javaVersionName;
@@ -63,24 +73,30 @@ class Spigot {
                         let dir = fs.mkdtempSync('./tmp/', 'utf-8');
                         //let exec = await execSync('cd ' + dir + ' && ' + javaPath + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../out/spigot/' + versionName);
                         let isSnapshot = !this.utils.isRelease(versionName);
-                        let version = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
-                        this.versions.push(version);
+                        let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
+                        this.spigotVersions.push(spigotVersion);
+
+                        let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
+                        this.craftBukkitVersions.push(craftBukkitVersion);
+                        //fs.cpSync('./out/spigot/craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
+                        //fs.unlinkSync('./out/spigot/craftbukkit-'+versionName+'.jar');
                     });
 
                 }
             }
 
-        })
+        }) //TODO MAKE THIS FUCKING SYNCHRONOUS
     }
 
-    private static getLocalVersions(): Array<Version> {
+    private static getLocalVersions(): { spigot: Array<Version>, craftbukkit: Array<Version> } {
         let exists = fs.existsSync('out/spigot/versions.json');
 
         if (exists) {
-            let versions = fs.readFileSync('out/spigot/versions.json', 'utf8');
-            return JSON.parse(versions);
+            let spigotVersions = fs.readFileSync('out/spigot/versions.json', 'utf8');
+            let craftBukkitVersions = fs.readFileSync('out/craftbukkit/versions.json', 'utf8');
+            return {spigot: JSON.parse(spigotVersions), craftbukkit: JSON.parse(craftBukkitVersions)};
         } else {
-            return [];
+            return {spigot: [], craftbukkit: []};
         }
     }
 
