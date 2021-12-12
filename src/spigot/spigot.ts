@@ -3,8 +3,9 @@ import * as fs from "fs";
 import axios from "axios";
 import Utils from "../utils";
 import Version from "./version";
-import {execSync} from "child_process";
 
+
+// Spigot and Craftbukkit getter
 class Spigot {
     private bt: BuildTools;
     public versions: Array<Version>;
@@ -18,37 +19,49 @@ class Spigot {
 
     }
 
-    private updateVersions() {
-        axios.get("https://hub.spigotmc.org/versions/").then(res => {
+    private async updateVersions() {
+        await axios.get("https://hub.spigotmc.org/versions/").then(async res => {
             let latestVersions: Array<string> = res.data.split("\n").filter((line: string) => line.startsWith("<a href=\"1.")).map((line: string) => line.split("\"")[1]).map((line: string) => line.replace('.json', '')).sort((a: string, b: string) => Utils.sortVersions(a, b) ? 1 : -1);
-            latestVersions.forEach((version: string) => {
-                if (!this.versions.find((v: Version) => v.version === version)) {
-                    axios.get("https://hub.spigotmc.org/versions/" + version + ".json").then(res => {
+            for (const versionName of latestVersions) {
+                if (!this.versions.find((v: Version) => v.version === versionName)) {
+                    await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json").then(async res => {
                         let json = res.data;
-                        let javaVersion;
+                        let javaVersionName;
+                        let javaVersions: Array<number>;
                         try {
-                            javaVersion = this.utils.getJavaVersion(Number.parseInt(json.javaVersions[0]));
+                            javaVersions = json.javaVersions.map((javaVersion: string) => parseInt(javaVersion));
+                            javaVersionName = this.utils.getJavaVersion(javaVersions[0]);
                         } catch (e) {
-                            javaVersion = "1.8.0";
+                            javaVersions = [52];
+                            javaVersionName = "1.8.0";
                         }
 
                         //create tmp dir
-                        if (!fs.existsSync('./tmp')){
+                        if (!fs.existsSync('./tmp')) {
                             fs.mkdirSync('./tmp');
                         }
 
                         let dir = fs.mkdtempSync('./tmp/', 'utf-8');
                         //java path
-                        let javaPath = '/usr/lib/jvm/java-'+javaVersion+'/bin/java';
-                        let exec = execSync('cd '+dir+' && '+javaPath+' -jar ../../out/buildtools/BuildTools.jar --rev ' + version + ' --output-dir ../../out/spigot/'+version);
-                        process.exit();
+                        let javaPath = '/usr/lib/jvm/java-' + javaVersionName + '/bin/java';
+
+                        if (!fs.existsSync(javaPath)) {
+                            javaPath = '/usr/lib/jvm/openjdk-' + javaVersionName + '/bin/java';
+                            if (!fs.existsSync(javaPath)) {
+                                console.log("Java not found");
+                            }
+                        }
+                        //let exec = await execSync('cd ' + dir + ' && ' + javaPath + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../out/spigot/' + versionName);
+                        let isSnapshot = !this.utils.isRelease(versionName);
+                        let version = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
+                        this.versions.push(version);
                     });
 
-
-
                 }
-            });
-        });
+            }
+
+        })
+        fs.writeFileSync('./out/spigot/versions.json', JSON.stringify(this.versions));
     }
 
     private static getLocalVersions(): Array<Version> {

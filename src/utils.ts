@@ -1,5 +1,5 @@
 class Utils {
-    // sort minecraft versions
+    // sort minecraft versions TODO: this doesnt work
     public static sortVersions(a: string, b: string): number {
         const aSplit: Array<string> = a.split('.');
         const bSplit: Array<string> = b.split('.');
@@ -60,6 +60,11 @@ class Utils {
             61: '17',
         };
         return javaMap[classVersion];
+    }
+
+    // check if version is release
+    public isRelease(version: string): boolean {
+        return !version.includes('-') || version.split('.').length !== 0;
     }
 }
 
