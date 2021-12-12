@@ -4,4 +4,4 @@ node_modules/
 
 *.js
 
-out/
+dist/
