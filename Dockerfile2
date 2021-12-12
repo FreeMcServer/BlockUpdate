@@ -1,0 +1,18 @@
+FROM debian:stable
+RUN apt-get update -y && apt-get install -y wget apt-transport-https gnupg
+RUN wget https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+RUN gpg --no-default-keyring --keyring ./adoptopenjdk-keyring.gpg --import public
+RUN gpg --no-default-keyring --keyring ./adoptopenjdk-keyring.gpg --export --output adoptopenjdk-archive-keyring.gpg
+RUN rm -rf adoptopenjdk-keyring.gpg
+RUN mv adoptopenjdk-archive-keyring.gpg /usr/share/keyrings && sudo chown root:root /usr/share/keyrings/adoptopenjdk-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/adoptopenjdk-archive-keyring.gpg] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb <codename> main" | sudo tee /etc/apt/sources.list.d/adoptopenjdk.list
+RUN apt-get update -y
+RUN apt-get install adoptopenjdk-11-hotspot -y
+RUN apt-get install adoptopenjdk-15-hotspot -y
+RUN apt-get install adoptopenjdk-16-hotspot -y
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install build-essential nodejs -y
+COPY . /root/app
+WORKDIR /root/app
+RUN npm install
+CMD ["npm", "run", "run"]

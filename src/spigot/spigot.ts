@@ -52,14 +52,16 @@ class Spigot {
                 }
                 try {
                     javaVersions.forEach((javaVersion: number) => {
-                        if (finished) return;
-
-                        javaVersionName = this.utils.getJavaVersion(javaVersion);
-                        try {
-                            javaPath = execSync("update-alternatives --display java | grep " + javaVersionName).toString().split("\n")[0].split(" - ")[0];
-                            finished = true;
-                        } catch (e) {
-                            console.log("Java version " + javaVersionName + " not found. Skipping...");
+                        if (!finished){
+                            javaVersionName = this.utils.getJavaVersion(javaVersion);
+                            try {
+                                javaPath = execSync("update-alternatives --display java | grep " + javaVersionName).toString().split("\n")[0].split(" - ")[0].replace('  link best version is ', '');
+                                console.log(javaPath);
+                                console.log("STOP FOR FUCK SAKE");
+                                finished = true;
+                            } catch (e) {
+                                console.log("Java version " + javaVersionName + " not found. Skipping...");
+                            }
                         }
                     });
                 } catch (e) {
