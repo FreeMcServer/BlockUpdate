@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:21.04
 RUN apt-get update -y && apt-get install -y software-properties-common
 RUN apt-get update -y
 RUN apt-get install openjdk-8-jdk -y
