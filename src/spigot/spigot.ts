@@ -8,8 +8,10 @@ import {execSync} from "child_process";
 class Spigot {
     private bt: BuildTools;
     public versions: Array<Version>;
+    private utils: Utils;
 
     constructor() {
+        this.utils = new Utils;
         this.bt = new BuildTools();
         this.versions = Spigot.getLocalVersions();
         this.updateVersions()
@@ -21,14 +23,29 @@ class Spigot {
             let latestVersions: Array<string> = res.data.split("\n").filter((line: string) => line.startsWith("<a href=\"1.")).map((line: string) => line.split("\"")[1]).map((line: string) => line.replace('.json', '')).sort((a: string, b: string) => Utils.sortVersions(a, b) ? 1 : -1);
             latestVersions.forEach((version: string) => {
                 if (!this.versions.find((v: Version) => v.version === version)) {
-                    //create tmp dir
-                    if (!fs.existsSync('./tmp')){
-                        fs.mkdirSync('./tmp');
-                    }
+                    axios.get("https://hub.spigotmc.org/versions/" + version + ".json").then(res => {
+                        let json = res.data;
+                        let javaVersion;
+                        try {
+                            javaVersion = this.utils.getJavaVersion(Number.parseInt(json.javaVersions[0]));
+                        } catch (e) {
+                            javaVersion = "1.8.0";
+                        }
 
-                    let dir = fs.mkdtempSync('./tmp/', 'utf-8');
-                    let exec = execSync('cd '+dir+' && java -jar ../../out/buildtools/BuildTools.jar --rev ' + version + ' --output-dir ../../out/spigot/'+version);
-                    process.exit();
+                        //create tmp dir
+                        if (!fs.existsSync('./tmp')){
+                            fs.mkdirSync('./tmp');
+                        }
+
+                        let dir = fs.mkdtempSync('./tmp/', 'utf-8');
+                        //java path
+                        let javaPath = '/usr/lib/jvm/java-'+javaVersion+'/bin/java';
+                        let exec = execSync('cd '+dir+' && '+javaPath+' -jar ../../out/buildtools/BuildTools.jar --rev ' + version + ' --output-dir ../../out/spigot/'+version);
+                        process.exit();
+                    });
+
+
+
                 }
             });
         });
