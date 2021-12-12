@@ -1,8 +1,18 @@
-import {exec} from 'child_process';
+import * as fs from "fs";
 import Spigot from "./spigot/spigot";
 
-let spigot;
-spigot = new Spigot();
+async function start() {
+    if (!fs.existsSync("./out")) {
+        fs.mkdirSync("./out");
+    }
+
+    let spigot = new Spigot();
+    await spigot.updateVersions();
+
+    console.log("\nDone!");
+}
+
+start();
 
 // let versions = ['1.17.1'];
 // for (let i = 0; i < versions.length; i++) {

@@ -5,15 +5,11 @@ import Utils from "../utils";
 import Version from "./version";
 import {execSync} from "child_process";
 
-let promiseFinally = require('promise.prototype.finally');
-promiseFinally.shim();
-
-
 // Spigot and Craftbukkit getter
 class Spigot {
     private bt: BuildTools;
-    public spigotVersions: Array<Version>;
-    public craftBukkitVersions: Array<Version>;
+    public spigotVersions: Version[];
+    public craftBukkitVersions: Version[];
     private utils: Utils;
 
     constructor() {
@@ -23,69 +19,70 @@ class Spigot {
         if (!fs.existsSync("./out/craftbukkit")) {
             fs.mkdirSync("./out/craftbukkit");
         }
-        this.utils = new Utils;
+        this.utils = new Utils();
         this.bt = new BuildTools();
-        let versions = Spigot.getLocalVersions();
+        const versions = Spigot.getLocalVersions();
         this.spigotVersions = versions.spigot;
         this.craftBukkitVersions = versions.craftbukkit;
-        this.updateVersions()
     }
 
-    private updateVersions() {
-         axios.get("https://hub.spigotmc.org/versions/").then(res => {
-            let latestVersions: Array<string> = res.data.split("\n").filter((line: string) => line.startsWith("<a href=\"1.")).map((line: string) => line.split("\"")[1]).map((line: string) => line.replace('.json', '')).sort((a: string, b: string) => Utils.sortVersions(a, b) ? 1 : -1);
-            for (const versionName of latestVersions) {
-                if (!this.spigotVersions.find((v: Version) => v.version === versionName)) {
-                    axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json").then(res => {
-                        let json = res.data;
-                        let javaVersionName;
-                        let javaVersions: Array<number>;
-                        let javaPath: string;
-                        let finished: boolean = false;
-                        if (!json.javaVersions) {
-                            javaVersions = [52];
-                            javaVersionName = "1.8.0";
-                            finished = true;
-                        } else {
-                            javaVersions = json.javaVersions.map((javaVersion: string) => parseInt(javaVersion));
-                        }
-                        try {
-                            javaVersions.forEach((javaVersion: number) => {
-                                if (finished) return;
+    async updateVersions() {
+        const res = await axios.get("https://hub.spigotmc.org/versions/");
+        const data = res.data as string;
+        const latestVersions = data.split("\n")
+                                   .filter(line => line.startsWith('<a href="1.'))
+                                   .map(line => line.split('"')[1])
+                                   .map(line => line.replace('.json', ''))
+                                   .sort(Utils.sortVersions);
 
-                                javaVersionName = this.utils.getJavaVersion(javaVersion);
-                                try {
-                                    javaPath = execSync("update-alternatives --display java | grep "+javaVersionName).toString().split("\n")[0].split(" - ")[0];
-                                    finished = true;
-                                } catch (e) {
-                                    console.log("Java version " + javaVersionName + " not found. Skipping...");
-                                }
-                            });
-                        } catch (e) {
-                            console.log("No java versions found for this version. You need to install one of the following java versions: " + javaVersions.join(", "));
-                        }
-
-                        //create tmp dir
-                        if (!fs.existsSync('./tmp')) {
-                            fs.mkdirSync('./tmp');
-                        }
-
-                        let dir = fs.mkdtempSync('./tmp/', 'utf-8');
-                        //let exec = await execSync('cd ' + dir + ' && ' + javaPath + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../out/spigot/' + versionName);
-                        let isSnapshot = !this.utils.isRelease(versionName);
-                        let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
-                        this.spigotVersions.push(spigotVersion);
-
-                        let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
-                        this.craftBukkitVersions.push(craftBukkitVersion);
-                        //fs.cpSync('./out/spigot/craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
-                        //fs.unlinkSync('./out/spigot/craftbukkit-'+versionName+'.jar');
-                    });
-
+        for (const versionName of latestVersions) {
+            if (!this.spigotVersions.find((v: Version) => v.version === versionName)) {
+                const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
+                let json = res.data;
+                let javaVersionName: string;
+                let javaVersions: number[];
+                let javaPath: string;
+                let finished: boolean = false;
+                if (!json.javaVersions) {
+                    javaVersions = [52];
+                    javaVersionName = "1.8.0";
+                    finished = true;
+                } else {
+                    javaVersions = json.javaVersions.map((javaVersion: string) => parseInt(javaVersion));
                 }
-            }
+                try {
+                    javaVersions.forEach((javaVersion: number) => {
+                        if (finished) return;
 
-        }) //TODO MAKE THIS FUCKING SYNCHRONOUS
+                        javaVersionName = this.utils.getJavaVersion(javaVersion);
+                        try {
+                            javaPath = execSync("update-alternatives --display java | grep " + javaVersionName).toString().split("\n")[0].split(" - ")[0];
+                            finished = true;
+                        } catch (e) {
+                            console.log("Java version " + javaVersionName + " not found. Skipping...");
+                        }
+                    });
+                } catch (e) {
+                    console.log("No java versions found for this version. You need to install one of the following java versions: " + javaVersions.join(", "));
+                }
+
+                //create tmp dir
+                if (!fs.existsSync('./tmp')) {
+                    fs.mkdirSync('./tmp');
+                }
+
+                let dir = fs.mkdtempSync('./tmp/', 'utf-8');
+                //let exec = await execSync('cd ' + dir + ' && ' + javaPath + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../out/spigot/' + versionName);
+                let isSnapshot = !this.utils.isRelease(versionName);
+                let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
+                this.spigotVersions.push(spigotVersion);
+
+                let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
+                this.craftBukkitVersions.push(craftBukkitVersion);
+                //fs.cpSync('./out/spigot/craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
+                //fs.unlinkSync('./out/spigot/craftbukkit-'+versionName+'.jar');
+            }
+        }
     }
 
     private static getLocalVersions(): { spigot: Array<Version>, craftbukkit: Array<Version> } {
