@@ -71,6 +71,7 @@ class Spigot {
                 //create tmp dir
                 if (!fs.existsSync('./tmp')) {
                     fs.mkdirSync('./tmp');
+                    console.log("Created tmp dir");
                 }
 
                 let dir = fs.mkdtempSync('./tmp/', 'utf-8');
