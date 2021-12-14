@@ -1,7 +1,8 @@
 FROM ubuntu:21.10
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get install -y curl software-properties-common python3 python3-pip
 RUN pip3 install s3cmd
-RUN DEBIAN_FRONTEND=noninteractive apt-get update -y
+RUN apt-get update -y
 RUN apt-get install openjdk-8-jdk -y
 RUN apt-get install openjdk-11-jdk -y
 RUN apt-get install openjdk-16-jdk -y
