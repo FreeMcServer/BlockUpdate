@@ -1,12 +1,15 @@
 import * as fs from "fs";
 import axios from "axios";
+import Spigot from "./spigot";
 
 class BuildTools {
     private buildToolsApi: string = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json";
     private buildToolsVersion: string;
+    private spigotKlass : Spigot;
 
-    constructor() {
+    constructor(spigot: Spigot) {
         this.buildToolsVersion = BuildTools.getBuildToolsVersion();
+        this.spigotKlass = spigot;
         this.updateBuildTools();
     }
 
@@ -16,9 +19,11 @@ class BuildTools {
             let latestVersion = response.data.id!;
             if (latestVersion <= this.buildToolsVersion) {
                 console.log("BuildTools is up to date");
+                this.spigotKlass.init();
             } else {
                 console.log("BuildTools is outdated, updating...");
                 this.downloadBuildTools(latestVersion);
+                // Init is done on the download
             }
         });
         return;
@@ -53,7 +58,7 @@ class BuildTools {
             response.data.on('end', () => {
                 console.log("BuildTools downloaded");
                 fs.writeSync(fs.openSync(`./out/buildtools/.version`, 'w'), version);
-
+                this.spigotKlass.init();
             });
         });
     }
