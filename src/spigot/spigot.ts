@@ -8,9 +8,9 @@ import S3Uploader from "../s3/S3Uploader";
 
 // Spigot and Craftbukkit getter
 class Spigot {
-    private bt: BuildTools;
-    public spigotVersions: Version[] | undefined;
-    public craftBukkitVersions: Version[] | undefined;
+    private bt?: BuildTools;
+    public spigotVersions?: Version[];
+    public craftBukkitVersions?: Version[];
     private utils: Utils;
 
     constructor() {
@@ -21,14 +21,16 @@ class Spigot {
             fs.mkdirSync("./out/craftbukkit");
         }
         this.utils = new Utils();
-        this.bt = new BuildTools(this); //TODO: This doesnt finish before we start building... Lovely async...
     }
 
-    public init(){
+    public async init() {
+        this.bt = new BuildTools();
+        await this.bt.init();
+
         const versions = Spigot.getLocalVersions();
         this.spigotVersions = versions.spigot;
         this.craftBukkitVersions = versions.craftbukkit;
-        this.updateVersions();
+        await this.updateVersions();
         console.log("Spigot and Craftbukkit versions updated");
     }
 
@@ -40,10 +42,9 @@ class Spigot {
                                    .map(line => line.split('"')[1])
                                    .map(line => line.replace('.json', ''))
                                    .sort(Utils.sortVersions);
-
+        let tmpDir = fs.mkdtempSync('./tmp/', 'utf-8');
         for (const versionName of latestVersions) {
-            // @ts-ignore
-            if (!this.spigotVersions.find((v: Version) => v.version === versionName)) {
+            if (!this.spigotVersions!.find((v: Version) => v.version === versionName)) {
                 const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
                 let json = res.data;
                 let javaVersionName: string;
@@ -62,7 +63,7 @@ class Spigot {
                     console.log("Created tmp dir");
                 }
 
-                let tmpDir = fs.mkdtempSync('./tmp/', 'utf-8');
+
                 let spigotDir = "./out/spigot/"+versionName+"/"
                 if (!fs.existsSync(spigotDir)) {
                     fs.mkdirSync(spigotDir);
@@ -72,13 +73,15 @@ class Spigot {
                     fs.mkdirSync(craftbukkitDir);
                 }
 
+                console.log("Updating version: " + versionName);
+
                 // if debug mode, don't download, otherwise do.
                 if(this.utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
                     fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
-                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir, { stdio: 'ignore' });
+                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir, { stdio: 'ignore' });
                     if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
                         fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
                         // fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
@@ -86,12 +89,10 @@ class Spigot {
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
                 let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
-                // @ts-ignore
-                this.spigotVersions.push(spigotVersion);
+                this.spigotVersions!.push(spigotVersion);
 
                 let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
-                // @ts-ignore
-                this.craftBukkitVersions.push(craftBukkitVersion);
+                this.craftBukkitVersions!.push(craftBukkitVersion);
             }
         }
 

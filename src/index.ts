@@ -2,13 +2,15 @@ import * as fs from "fs";
 import Spigot from "./spigot/spigot";
 import {execSync} from "child_process";
 
-function start() {
+async function start() {
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
 
     let spigot = new Spigot();
+    await spigot.init();
 
+    console.log("Done!");
 }
 //console.log(execSync("update-alternatives --display java").toString());
 start();
