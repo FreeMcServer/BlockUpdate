@@ -81,7 +81,7 @@ class Spigot {
                     await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir, { stdio: 'ignore' });
                     if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
                         fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
-                        fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
+                        // fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
                     }
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
