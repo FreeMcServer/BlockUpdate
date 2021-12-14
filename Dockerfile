@@ -25,5 +25,6 @@ RUN apt-get install -y maven git # pretty sure these are needed for building spi
 
 COPY . /root/app
 WORKDIR /root/app
+RUN rm -rf dist/* && rm -rf out/*
 RUN npm install
 CMD ["npm", "run", "run"]
