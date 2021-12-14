@@ -1,1 +1,1 @@
-docker build -t version-updater .
+docker build -t registry.facha.dev/freemcserver/version-updater:master .

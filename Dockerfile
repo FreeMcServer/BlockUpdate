@@ -1,5 +1,6 @@
 FROM ubuntu:21.10
-RUN apt-get update -y && apt-get install -y curl software-properties-common
+RUN apt-get update -y && apt-get install -y curl software-properties-common python3 python3-pip
+RUN pip3 install s3cmd
 RUN apt-get update -y
 RUN apt-get install openjdk-8-jdk -y
 RUN apt-get install openjdk-11-jdk -y
@@ -24,5 +25,4 @@ RUN apt-get install -y maven git # pretty sure these are needed for building spi
 COPY . /root/app
 WORKDIR /root/app
 RUN npm install
-RUN npm run build
 CMD ["npm", "run", "run"]

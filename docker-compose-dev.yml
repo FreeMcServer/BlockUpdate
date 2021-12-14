@@ -6,4 +6,5 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/root/app
+      - ./dist:/root/app/dist/
+      - ./out:/root/app/out/
