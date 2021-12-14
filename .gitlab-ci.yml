@@ -22,4 +22,4 @@ deploy:
     - export S3_KEY=$S3_KEY
     - export S3_SECRET=$S3_SECRET
   only:
-    - deplpy
+    - deploy
