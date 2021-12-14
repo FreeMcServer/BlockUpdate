@@ -9,7 +9,7 @@ class S3Uploader {
             return;
         }
         console.log("Uploading to S3");
-        let rx = await execSync('s3cmd sync --host=' + process.env.S3_ENDPOINT + ' --host-bucket=' + process.env.S3_ENDPOINT + ' --access_key=' + process.env.S3_KEY + ' --secret_key=' + process.env.S3_SECRET + ' -v ' + localFolder + ' s3://' + process.env.S3_BUCKET + '/' + dstFolder + '/');
+        let rx = await execSync('s3cmd sync -P --host=' + process.env.S3_ENDPOINT + ' --host-bucket=' + process.env.S3_ENDPOINT + ' --access_key=' + process.env.S3_KEY + ' --secret_key=' + process.env.S3_SECRET + ' -v ' + localFolder + ' s3://' + process.env.S3_BUCKET + '/' + dstFolder + '/');
         console.log(rx.toString());
     }
 }
