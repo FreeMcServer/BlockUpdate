@@ -8,3 +8,19 @@ docker-build:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+  only:
+    - master
+deploy:
+  image: "$CI_REGISTRY_IMAGE:master"
+  stage: deploy
+  script:
+    - export DEBUG=false
+    - export S3_UPLOAD=true
+    - export S3_REGION=fr-par
+    - export S3_ENDPOINT=http://s3.fr-par.scw.cloud
+    - export S3_BUCKET=download.freemcserver.net
+    - export S3_KEY="$S3_KEY"
+    - export S3_SECRET="$S3_SECRET"
+    - cd /root/app && npm run run
+  only:
+    - deploy
