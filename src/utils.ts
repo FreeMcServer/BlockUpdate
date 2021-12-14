@@ -47,9 +47,9 @@ class Utils {
             48: '1.4.0',
             49: '1.5.0',
             50: '1.6.0',
-            51: '1.7.0',
-            52: '1.8.0',
-            53: '9.0.4',
+            51: '1.7.0', // Everything 7 and below doesnt matter.
+            52: '8',
+            53: '9',
             54: '10',
             55: '11',
             56: '12',
@@ -65,6 +65,11 @@ class Utils {
     // check if version is release
     public isRelease(version: string): boolean {
         return !version.includes('-') || version.split('.').length !== 0;
+    }
+
+    // check if debug mode
+    public isDebug(): boolean {
+        return process.env.DEBUG === 'true';
     }
 }
 

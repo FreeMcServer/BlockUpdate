@@ -20,13 +20,15 @@ class Spigot {
             fs.mkdirSync("./out/craftbukkit");
         }
         this.utils = new Utils();
-        this.bt = new BuildTools();
+        this.bt = new BuildTools(); //TODO: This doesnt finish before we start building... Lovely async...
         const versions = Spigot.getLocalVersions();
         this.spigotVersions = versions.spigot;
         this.craftBukkitVersions = versions.craftbukkit;
+        this.updateVersions();
+        console.log("Spigot and Craftbukkit versions updated");
     }
 
-    async updateVersions() {
+    private async updateVersions() {
         const res = await axios.get("https://hub.spigotmc.org/versions/");
         const data = res.data as string;
         const latestVersions = data.split("\n")
@@ -41,31 +43,12 @@ class Spigot {
                 let json = res.data;
                 let javaVersionName: string;
                 let javaVersions: number[];
-                let javaPath: string;
-                let finished: boolean = false;
                 if (!json.javaVersions) {
                     javaVersions = [52];
-                    javaVersionName = "1.8.0";
-                    finished = true;
+                    javaVersionName = "8";
                 } else {
                     javaVersions = json.javaVersions.map((javaVersion: string) => parseInt(javaVersion));
-                }
-                try {
-                    javaVersions.forEach((javaVersion: number) => {
-                        if (!finished){
-                            javaVersionName = this.utils.getJavaVersion(javaVersion);
-                            try {
-                                javaPath = execSync("update-alternatives --display java | grep " + javaVersionName).toString().split("\n")[0].split(" - ")[0].replace('  link best version is ', '');
-                                console.log(javaPath);
-                                console.log("STOP FOR FUCK SAKE");
-                                finished = true;
-                            } catch (e) {
-                                console.log("Java version " + javaVersionName + " not found. Skipping...");
-                            }
-                        }
-                    });
-                } catch (e) {
-                    console.log("No java versions found for this version. You need to install one of the following java versions: " + javaVersions.join(", "));
+                    javaVersionName = this.utils.getJavaVersion(javaVersions.sort((a, b) => a > b ? a : b)[0]);
                 }
 
                 //create tmp dir
@@ -74,30 +57,54 @@ class Spigot {
                     console.log("Created tmp dir");
                 }
 
-                let dir = fs.mkdtempSync('./tmp/', 'utf-8');
-                //let exec = await execSync('cd ' + dir + ' && ' + javaPath + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../out/spigot/' + versionName);
+                let tmpDir = fs.mkdtempSync('./tmp/', 'utf-8');
+                let spigotDir = "./out/spigot/"+versionName+"/"
+                if (!fs.existsSync(spigotDir)) {
+                    fs.mkdirSync(spigotDir);
+                }
+                let craftbukkitDir = "./out/craftbukkit/"+versionName+"/"
+                if (!fs.existsSync(craftbukkitDir)) {
+                    fs.mkdirSync(craftbukkitDir);
+                }
+
+                // if debug mode, don't download, otherwise do.
+                if(this.utils.isDebug()) {
+                    console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
+                    fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
+                    fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
+                } else {
+                    let exec = await execSync('cd ' + tmpDir + ' && java' + javaVersionName + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir);
+                    fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
+                    fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
+                }
                 let isSnapshot = !this.utils.isRelease(versionName);
                 let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
                 this.spigotVersions.push(spigotVersion);
 
                 let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
                 this.craftBukkitVersions.push(craftBukkitVersion);
-                //fs.cpSync('./out/spigot/craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
-                //fs.unlinkSync('./out/spigot/craftbukkit-'+versionName+'.jar');
             }
         }
+
+        fs.writeFileSync("./out/spigot/versions.json", JSON.stringify(this.spigotVersions));
+        fs.writeFileSync("./out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
     }
 
     private static getLocalVersions(): { spigot: Array<Version>, craftbukkit: Array<Version> } {
-        let exists = fs.existsSync('out/spigot/versions.json');
+        let existsSpigot = fs.existsSync('out/spigot/versions.json');
+        let existsCraftbukkit = fs.existsSync('out/craftbukkit/versions.json');
+        let spigotVersions: Array<Version> = [];
+        let craftBukkitVersions: Array<Version> = [];
 
-        if (exists) {
-            let spigotVersions = fs.readFileSync('out/spigot/versions.json', 'utf8');
-            let craftBukkitVersions = fs.readFileSync('out/craftbukkit/versions.json', 'utf8');
-            return {spigot: JSON.parse(spigotVersions), craftbukkit: JSON.parse(craftBukkitVersions)};
-        } else {
-            return {spigot: [], craftbukkit: []};
+
+        if (existsSpigot) {
+            spigotVersions = JSON.parse(fs.readFileSync('./out/spigot/versions.json', 'utf8'));
         }
+        if (existsCraftbukkit) {
+            craftBukkitVersions = JSON.parse(fs.readFileSync('./out/craftbukkit/versions.json', 'utf8'));
+        }
+        return {spigot: spigotVersions, craftbukkit: craftBukkitVersions};
+
     }
 
 }

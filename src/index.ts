@@ -1,15 +1,13 @@
 import * as fs from "fs";
 import Spigot from "./spigot/spigot";
 
-async function start() {
+function start() {
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
 
     let spigot = new Spigot();
-    await spigot.updateVersions();
 
-    console.log("\nDone!");
 }
 
 start();
