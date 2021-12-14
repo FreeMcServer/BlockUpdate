@@ -13,6 +13,8 @@ docker-build:
 deploy:
   image: "$CI_REGISTRY_IMAGE:master"
   stage: deploy
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - export DEBUG=true
     - export S3_UPLOAD=false
@@ -21,5 +23,6 @@ deploy:
     - export S3_BUCKET=download.freemcserver.net
     - export S3_KEY=$S3_KEY
     - export S3_SECRET=$S3_SECRET
+    - npm run run
   only:
     - deploy
