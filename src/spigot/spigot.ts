@@ -42,7 +42,7 @@ class Spigot {
                                    .map(line => line.split('"')[1])
                                    .map(line => line.replace('.json', ''))
                                    .sort(Utils.sortVersions);
-
+        let tmpDir = fs.mkdtempSync('./tmp/', 'utf-8');
         for (const versionName of latestVersions) {
             if (!this.spigotVersions!.find((v: Version) => v.version === versionName)) {
                 const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
@@ -63,7 +63,7 @@ class Spigot {
                     console.log("Created tmp dir");
                 }
 
-                let tmpDir = fs.mkdtempSync('./tmp/', 'utf-8');
+
                 let spigotDir = "./out/spigot/"+versionName+"/"
                 if (!fs.existsSync(spigotDir)) {
                     fs.mkdirSync(spigotDir);
@@ -81,7 +81,7 @@ class Spigot {
                     fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
-                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir, { stdio: 'ignore' });
+                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir, { stdio: 'ignore' });
                     if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
                         fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
                         // fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
