@@ -1,6 +1,7 @@
 
 node_modules/
-!out/buildtools/BuildTools.jar
+out/
+!out/.gitkeep
 
 *.js
 
@@ -9,3 +10,4 @@ dist/
 tmp/
 
 .idea/
+.env
