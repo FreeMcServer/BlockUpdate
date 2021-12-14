@@ -2,7 +2,8 @@ version: '3.4'
 services:
   version-updater:
     image: "registry.facha.dev/freemcserver/version-updater:master"
+    user: root
     env_file:
       - .env
     volumes:
-      - ./out:/root/app/out
+      - .:/root/app

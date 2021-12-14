@@ -11,6 +11,7 @@ function start() {
 }
 
 start();
+console.log('Finished, ready to upload!')
 
 // let versions = ['1.17.1'];
 // for (let i = 0; i < versions.length; i++) {
