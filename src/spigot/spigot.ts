@@ -4,6 +4,7 @@ import axios from "axios";
 import Utils from "../utils";
 import Version from "./version";
 import {execSync} from "child_process";
+import S3Uploader from "../s3/S3Uploader";
 
 // Spigot and Craftbukkit getter
 class Spigot {
@@ -88,6 +89,9 @@ class Spigot {
 
         fs.writeFileSync("./out/spigot/versions.json", JSON.stringify(this.spigotVersions));
         fs.writeFileSync("./out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
+        console.log("Spigot and Craftbukkit versions updated, ready to upload");
+        let uploader = new S3Uploader()
+        let rx = await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
     }
 
     private static getLocalVersions(): { spigot: Array<Version>, craftbukkit: Array<Version> } {
