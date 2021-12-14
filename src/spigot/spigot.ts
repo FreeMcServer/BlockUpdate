@@ -8,9 +8,9 @@ import S3Uploader from "../s3/S3Uploader";
 
 // Spigot and Craftbukkit getter
 class Spigot {
-    private bt: BuildTools;
-    public spigotVersions: Version[] | undefined;
-    public craftBukkitVersions: Version[] | undefined;
+    private bt?: BuildTools;
+    public spigotVersions?: Version[];
+    public craftBukkitVersions?: Version[];
     private utils: Utils;
 
     constructor() {
@@ -21,14 +21,16 @@ class Spigot {
             fs.mkdirSync("./out/craftbukkit");
         }
         this.utils = new Utils();
-        this.bt = new BuildTools(this); //TODO: This doesnt finish before we start building... Lovely async...
     }
 
-    public init(){
+    public async init() {
+        this.bt = new BuildTools();
+        await this.bt.init();
+
         const versions = Spigot.getLocalVersions();
         this.spigotVersions = versions.spigot;
         this.craftBukkitVersions = versions.craftbukkit;
-        this.updateVersions();
+        await this.updateVersions();
         console.log("Spigot and Craftbukkit versions updated");
     }
 
@@ -42,8 +44,7 @@ class Spigot {
                                    .sort(Utils.sortVersions);
 
         for (const versionName of latestVersions) {
-            // @ts-ignore
-            if (!this.spigotVersions.find((v: Version) => v.version === versionName)) {
+            if (!this.spigotVersions!.find((v: Version) => v.version === versionName)) {
                 const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
                 let json = res.data;
                 let javaVersionName: string;
@@ -72,6 +73,8 @@ class Spigot {
                     fs.mkdirSync(craftbukkitDir);
                 }
 
+                console.log("Updating version: " + versionName);
+
                 // if debug mode, don't download, otherwise do.
                 if(this.utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
@@ -86,12 +89,10 @@ class Spigot {
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
                 let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
-                // @ts-ignore
-                this.spigotVersions.push(spigotVersion);
+                this.spigotVersions!.push(spigotVersion);
 
                 let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
-                // @ts-ignore
-                this.craftBukkitVersions.push(craftBukkitVersion);
+                this.craftBukkitVersions!.push(craftBukkitVersion);
             }
         }
 
