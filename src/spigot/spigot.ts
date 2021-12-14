@@ -78,9 +78,11 @@ class Spigot {
                     fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
-                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --compile craftbukkit --output-dir ../../'+spigotDir, { stdio: 'ignore' });
-                    fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
-                    fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
+                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir, { stdio: 'ignore' });
+                    if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
+                        fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
+                        fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
+                    }
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
                 let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
