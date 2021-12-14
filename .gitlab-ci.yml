@@ -20,6 +20,7 @@ deploy:
     - export S3_ENDPOINT=http://s3.fr-par.scw.cloud
     - export S3_BUCKET=download.freemcserver.net
     - export S3_KEY="$S3_KEY"
+    - echo "$S3_KEY"
     - export S3_SECRET="$S3_SECRET"
     - cd /root/app && npm run run
   only:
