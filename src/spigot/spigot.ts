@@ -9,8 +9,8 @@ import S3Uploader from "../s3/S3Uploader";
 // Spigot and Craftbukkit getter
 class Spigot {
     private bt: BuildTools;
-    public spigotVersions: Version[];
-    public craftBukkitVersions: Version[];
+    public spigotVersions: Version[] | undefined;
+    public craftBukkitVersions: Version[] | undefined;
     private utils: Utils;
 
     constructor() {
@@ -21,7 +21,10 @@ class Spigot {
             fs.mkdirSync("./out/craftbukkit");
         }
         this.utils = new Utils();
-        this.bt = new BuildTools(); //TODO: This doesnt finish before we start building... Lovely async...
+        this.bt = new BuildTools(this); //TODO: This doesnt finish before we start building... Lovely async...
+    }
+
+    public init(){
         const versions = Spigot.getLocalVersions();
         this.spigotVersions = versions.spigot;
         this.craftBukkitVersions = versions.craftbukkit;
@@ -39,6 +42,7 @@ class Spigot {
                                    .sort(Utils.sortVersions);
 
         for (const versionName of latestVersions) {
+            // @ts-ignore
             if (!this.spigotVersions.find((v: Version) => v.version === versionName)) {
                 const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
                 let json = res.data;
@@ -74,15 +78,17 @@ class Spigot {
                     fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
-                    let exec = await execSync('cd ' + tmpDir + ' && java' + javaVersionName + ' -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir);
+                    let exec = await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../../'+spigotDir);
                     fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
                     fs.unlinkSync(craftbukkitDir+'craftbukkit-'+versionName+'.jar');
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
                 let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
+                // @ts-ignore
                 this.spigotVersions.push(spigotVersion);
 
                 let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
+                // @ts-ignore
                 this.craftBukkitVersions.push(craftBukkitVersion);
             }
         }

@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import Spigot from "./spigot/spigot";
+import {execSync} from "child_process";
 
 function start() {
     if (!fs.existsSync("./out")) {
@@ -9,7 +10,7 @@ function start() {
     let spigot = new Spigot();
 
 }
-
+//console.log(execSync("update-alternatives --display java").toString());
 start();
 
 // let versions = ['1.17.1'];
