@@ -21,6 +21,6 @@ deploy:
     - export S3_BUCKET=download.freemcserver.net
     - export S3_KEY=${S3_KEY}
     - export S3_SECRET=${S3_SECRET}
-    - cd /root/app && node ./dist/index.js
+    - cd /root/app && npm run run
   only:
     - deploy
