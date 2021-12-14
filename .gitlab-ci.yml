@@ -14,7 +14,7 @@ deploy:
   image: "$CI_REGISTRY_IMAGE:master"
   stage: deploy
   script:
-    - export DEBUG=true
+    - export DEBUG=false
     - export S3_UPLOAD=true
     - export S3_REGION=fr-par
     - export S3_ENDPOINT=http://s3.fr-par.scw.cloud
