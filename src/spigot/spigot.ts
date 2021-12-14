@@ -42,7 +42,7 @@ class Spigot {
                                    .map(line => line.split('"')[1])
                                    .map(line => line.replace('.json', ''))
                                    .sort(Utils.sortVersions);
-        let tmpDir = fs.mkdtempSync('./tmp/', 'utf-8');
+        let tmpDir = fs.mkdirSync('./tmp/buildtools-data');
         for (const versionName of latestVersions) {
             if (!this.spigotVersions!.find((v: Version) => v.version === versionName)) {
                 const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
