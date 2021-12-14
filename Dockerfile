@@ -2,7 +2,7 @@ FROM ubuntu:21.10
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get install -y curl software-properties-common python3 python3-pip openjdk-8-jdk openjdk-11-jdk openjdk-16-jdk openjdk-17-jdk openjdk-18-jdk build-essential nodejs maven git && rm -rf /var/lib/apt/lists/*
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
-RUN apt-get update -y && apt-get install nodejs -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install nodejs -y
 RUN pip3 install s3cmd
 RUN echo -e '/usr/lib/jvm/java-8-openjdk-amd64/bin/java "$@"' > /usr/bin/java8 && \
     chmod +x /usr/bin/java8
