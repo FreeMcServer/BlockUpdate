@@ -12,7 +12,8 @@ async function start() {
 
     console.log("Done!");
 }
-//console.log(execSync("update-alternatives --display java").toString());
+console.log(execSync("update-alternatives --display java").toString());
+console.log(execSync("ls /usr/lib/jvm/").toString());
 start();
 
 // let versions = ['1.17.1'];
