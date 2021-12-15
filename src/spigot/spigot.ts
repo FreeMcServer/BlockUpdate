@@ -5,7 +5,6 @@ import Utils from "../utils";
 import Version from "./version";
 import {execSync} from "child_process";
 import S3Uploader from "../s3/S3Uploader";
-import {execaSync} from 'execa';
 
 // Spigot and Craftbukkit getter
 class Spigot {
@@ -82,12 +81,18 @@ class Spigot {
                     fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
-                    let stdout = execaSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir);
-                    console.log(stdout.stdout);
-                    if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
-                        fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
-                        fs.unlinkSync(tmpDir);
+                    try{
+                        await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir, { stdio: 'ignore' });
+                        if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
+                            fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
+                            fs.unlinkSync(tmpDir);
+                        }
+                    }catch (e) {
+                        console.log("Well, it crashed");
+                        let a = await execSync('cd ' + tmpDir + ' tail -n 20 BuildTools.log.txt');
+                        console.log(a);
                     }
+
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
                 let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
