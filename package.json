@@ -21,6 +21,5 @@
     "url": "git@git.facha.dev:FreeMCServer/version-updater.git"
   },
   "author": "Facha",
-  "license": "ISC",
-  "type" : "commonjs"
+  "license": "ISC"
 }

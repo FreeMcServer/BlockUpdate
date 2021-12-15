@@ -8,7 +8,7 @@ RUN apt-get install openjdk-11-jdk -y
 RUN apt-get install openjdk-16-jdk -y
 RUN apt-get install openjdk-17-jdk -y
 RUN apt-get install openjdk-18-jdk -y
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install build-essential nodejs -y
 RUN echo -e '/usr/lib/jvm/java-8-openjdk-amd64/bin/java "$@"' > /usr/bin/java8 && \
     chmod +x /usr/bin/java8
