@@ -5,6 +5,7 @@ import Utils from "../utils";
 import Version from "./version";
 import {execSync} from "child_process";
 import S3Uploader from "../s3/S3Uploader";
+import {execa} from "execa";
 
 // Spigot and Craftbukkit getter
 class Spigot {
@@ -81,7 +82,8 @@ class Spigot {
                     fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
-                    await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir, { stdio: 'ignore' });
+                    let stdout = await execa('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir);
+                    console.log(stdout);
                     if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
                         fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
                         fs.unlinkSync(tmpDir);
