@@ -90,7 +90,7 @@ class Spigot {
                     }catch (e) {
                         console.log("Well, it crashed");
                         let a = await execSync('cd ' + tmpDir + ' tail -n 20 BuildTools.log.txt');
-                        console.log(a);
+                        console.log(a.toString());
                     }
 
                 }
