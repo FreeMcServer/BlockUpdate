@@ -85,8 +85,8 @@ class Spigot {
                         await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar ../../out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ../'+spigotDir, { stdio: 'ignore' });
                         if(fs.existsSync(spigotDir+'craftbukkit-'+versionName+'.jar')){
                             fs.cpSync(spigotDir+'craftbukkit-'+versionName+'.jar', './out/craftbukkit/craftbukkit-'+versionName+'.jar');
-                            fs.unlinkSync(tmpDir);
                         }
+                        fs.unlinkSync(tmpDir);
                     }catch (e) {
                         console.log("Well, it crashed");
                         let a = await execSync('cd ' + tmpDir + ' tail -n 20 BuildTools.log.txt');
