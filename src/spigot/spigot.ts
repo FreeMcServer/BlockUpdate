@@ -59,7 +59,6 @@ class Spigot {
             .map(line => line.split('"')[1])
             .map(line => line.replace('.json', ''))
             .sort(Utils.sortVersions);
-
         for (const versionName of latestVersions) {
             const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
             let json = res.data;
@@ -89,14 +88,20 @@ class Spigot {
                 if (!fs.existsSync(craftbukkitDir)) {
                     fs.mkdirSync(craftbukkitDir);
                 }
-
+                if (!fs.existsSync('/root/app/out/spigot/versions.json')) {
+                    if (process.env.S3_UPLOAD === "true") {
+                        let rx = await axios.get('https://download.freemcserver.net/jar/spigot/versions.json');
+                        fs.writeFileSync('/root/app/out/spigot/versions.json', JSON.stringify(rx.data));
+                        console.log('Updated spigot versions from remote server');
+                    }
+                }
                 console.log("Updating version: " + versionName);
 
                 // if debug mode, don't download, otherwise do.
-                if(this.utils.isDebug()) {
+                if (this.utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
-                    fs.writeFileSync(spigotDir+"spigot-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
-                    fs.writeFileSync(craftbukkitDir+"craftbukkit-"+versionName+".jar", 'This is not a real JAR, don\'t use it for anything.');
+                    fs.writeFileSync(spigotDir + "spigot-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
+                    fs.writeFileSync(craftbukkitDir + "craftbukkit-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
                     try {
                         await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar /root/app/out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ' + spigotDir + ' && rm -rf ' + tmpDir, {stdio: 'ignore'});
