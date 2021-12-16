@@ -1,15 +1,12 @@
-import BuildTools from "./buildtools";
 import * as fs from "fs";
 import axios from "axios";
-import Utils from "../utils";
-import Version from "./version";
+import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
+import PaperVersion from "./PaperVersion";
 
 // PaperMC
 class Paper {
-    public paperVersions?: Version[];
-    public craftBukkitVersions?: Version[];
-    private bt?: BuildTools;
+    public paperVersions?: PaperVersion[];
     private utils: Utils;
 
     constructor() {
@@ -19,9 +16,9 @@ class Paper {
         this.utils = new Utils();
     }
 
-    private static async getLocalVersions(): Promise<{ paper: Array<Version> }> {
+    private static async getLocalVersions(): Promise<{ paper: Array<PaperVersion> }> {
         let existsPaper = fs.existsSync('/root/app/out/paper/versions.json');
-        let paperVersions: Array<Version> = [];
+        let paperVersions: Array<PaperVersion> = [];
 
 
         if (existsPaper) {
@@ -52,7 +49,7 @@ class Paper {
             const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
             let json = res.data;
             const latestVersion = json.builds.sort().reverse()[0];
-            if (!this.paperVersions!.find((v: Version) => v.spigotBuild === latestVersion)) {
+            if (!this.paperVersions!.find((v: PaperVersion) => v.build === latestVersion)) {
                 const build = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName + "/builds/" + latestVersion);
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
@@ -61,27 +58,27 @@ class Paper {
                 }
 
                 let tmpDir = fs.mkdtempSync('/root/app/tmp/', 'utf-8');
-                let spigotDir = "/root/app/out/paper/" + versionName + "/"
-                if (!fs.existsSync(spigotDir)) {
-                    fs.mkdirSync(spigotDir);
+                let dataDir = "/root/app/out/paper/" + versionName + "/"
+                if (!fs.existsSync(dataDir)) {
+                    fs.mkdirSync(dataDir);
                 }
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.
                 if (this.utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
-                    fs.writeFileSync(spigotDir + "paper-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
+                    fs.writeFileSync(dataDir + "paper-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
                     try {
-                        await this.downloadFile('https://papermc.io/api/v2/projects/paper/versions/' + versionName + '/builds/' + latestVersion + '/downloads/paper-' + versionName + '-' + latestVersion + '.jar', spigotDir + "paper-" + versionName + ".jar");
+                        await this.downloadFile('https://papermc.io/api/v2/projects/paper/versions/' + versionName + '/builds/' + latestVersion + '/downloads/paper-' + versionName + '-' + latestVersion + '.jar', dataDir + "paper-" + versionName + ".jar");
                     } catch (e) {
                         console.log(e);
                     }
 
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
-                let spigotVersion = new Version(versionName, isSnapshot, latestVersion, [], '');
-                this.paperVersions!.push(spigotVersion);
+                let paperVersion = new PaperVersion(versionName, isSnapshot, latestVersion, [], '');
+                this.paperVersions!.push(paperVersion);
             }
         }
 

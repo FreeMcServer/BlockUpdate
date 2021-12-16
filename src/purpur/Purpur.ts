@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import axios from "axios";
-import Utils from "../utils";
-import Version from "./version";
+import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
+import PurpurVersion from "./PurpurVersion";
 
 // Purpur
 class Purpur {
-    public purpurVersions?: Version[];
+    public purpurVersions?: PurpurVersion[];
     private utils: Utils;
 
     constructor() {
@@ -16,9 +16,9 @@ class Purpur {
         this.utils = new Utils();
     }
 
-    private static async getLocalVersions(): Promise<{ purpur: Array<Version> }> {
+    private static async getLocalVersions(): Promise<{ purpur: Array<PurpurVersion> }> {
         let existsPurpur = fs.existsSync('/root/app/out/purpur/versions.json');
-        let purpurVersions: Array<Version> = [];
+        let purpurVersions: Array<PurpurVersion> = [];
 
 
         if (existsPurpur) {
@@ -49,7 +49,7 @@ class Purpur {
             const res = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName);
             let json = res.data;
             const latestVersion = json.builds.latest;
-            if (!this.purpurVersions!.find((v: Version) => v.spigotBuild === latestVersion)) {
+            if (!this.purpurVersions!.find((v: PurpurVersion) => v.build === latestVersion)) {
                 const build = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion);
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
@@ -58,27 +58,27 @@ class Purpur {
                 }
 
                 let tmpDir = fs.mkdtempSync('/root/app/tmp/', 'utf-8');
-                let spigotDir = "/root/app/out/purpur/" + versionName + "/"
-                if (!fs.existsSync(spigotDir)) {
-                    fs.mkdirSync(spigotDir);
+                let dataDir = "/root/app/out/purpur/" + versionName + "/"
+                if (!fs.existsSync(dataDir)) {
+                    fs.mkdirSync(dataDir);
                 }
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.
                 if (this.utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
-                    fs.writeFileSync(spigotDir + "purpur-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
+                    fs.writeFileSync(dataDir + "purpur-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
                     try {
-                        await this.downloadFile("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion + "/download", spigotDir + "purpur-" + versionName + ".jar");
+                        await this.downloadFile("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion + "/download", dataDir + "purpur-" + versionName + ".jar");
                     } catch (e) {
                         console.log(e);
                     }
 
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
-                let spigotVersion = new Version(versionName, isSnapshot, latestVersion, [], '');
-                this.purpurVersions!.push(spigotVersion);
+                let purpurVersion = new PurpurVersion(versionName, isSnapshot, latestVersion, [], '');
+                this.purpurVersions!.push(purpurVersion);
             }
         }
 

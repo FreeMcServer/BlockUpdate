@@ -1,16 +1,16 @@
-import BuildTools from "./buildtools";
+import BuildTools from "./BuildTools";
 import * as fs from "fs";
 import axios from "axios";
-import Utils from "../utils";
-import Version from "./version";
+import Utils from "../Utils";
+import SpigotVersion from "./SpigotVersion";
 import {execSync} from "child_process";
 import S3Uploader from "../s3/S3Uploader";
 
 // Spigot and Craftbukkit getter
 class Spigot {
     private bt?: BuildTools;
-    public spigotVersions?: Version[];
-    public craftBukkitVersions?: Version[];
+    public spigotVersions?: SpigotVersion[];
+    public craftBukkitVersions?: SpigotVersion[];
     private utils: Utils;
 
     constructor() {
@@ -23,11 +23,11 @@ class Spigot {
         this.utils = new Utils();
     }
 
-    private static async getLocalVersions(): Promise<{ spigot: Array<Version>, craftbukkit: Array<Version> }> {
+    private static async getLocalVersions(): Promise<{ spigot: Array<SpigotVersion>, craftbukkit: Array<SpigotVersion> }> {
         let existsSpigot = fs.existsSync('/root/app/out/spigot/versions.json');
         let existsCraftbukkit = fs.existsSync('/root/app/out/craftbukkit/versions.json');
-        let spigotVersions: Array<Version> = [];
-        let craftBukkitVersions: Array<Version> = [];
+        let spigotVersions: Array<SpigotVersion> = [];
+        let craftBukkitVersions: Array<SpigotVersion> = [];
 
 
         if (existsSpigot) {
@@ -69,7 +69,7 @@ class Spigot {
         for (const versionName of latestVersions) {
             const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
             let json = res.data;
-            if (!this.spigotVersions!.find((v: Version) => v.ref === json.refs.Spigot)) {
+            if (!this.spigotVersions!.find((v: SpigotVersion) => v.ref === json.refs.Spigot)) {
                 let javaVersionName: string;
                 let javaVersions: number[];
                 if (!json.javaVersions) {
@@ -120,10 +120,10 @@ class Spigot {
 
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
-                let spigotVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
+                let spigotVersion = new SpigotVersion(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
                 this.spigotVersions!.push(spigotVersion);
 
-                let craftBukkitVersion = new Version(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
+                let craftBukkitVersion = new SpigotVersion(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
                 this.craftBukkitVersions!.push(craftBukkitVersion);
             }
         }

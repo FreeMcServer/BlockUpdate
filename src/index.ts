@@ -1,7 +1,7 @@
 import * as fs from "fs";
-import Purpur from "./spigot/purpur";
-import Spigot from "./spigot/spigot";
-import Paper from "./spigot/paper";
+import Purpur from "./purpur/Purpur";
+import Spigot from "./spigot/Spigot";
+import Paper from "./paper/Paper";
 
 async function start() {
     if (!fs.existsSync("./out")) {
