@@ -1,6 +1,7 @@
 import * as fs from "fs";
-import Paper from "./spigot/paper";
+import Purpur from "./spigot/purpur";
 import Spigot from "./spigot/spigot";
+import Paper from "./spigot/paper";
 
 async function start() {
     if (!fs.existsSync("./out")) {
@@ -12,6 +13,9 @@ async function start() {
 
     let paper = new Paper();
     await paper.init();
+
+    let purpur = new Purpur();
+    await purpur.init();
 
     console.log("Done!");
 }
