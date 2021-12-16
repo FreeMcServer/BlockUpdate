@@ -1,6 +1,7 @@
 import * as fs from "fs";
-import Spigot from "./spigot/spigot";
-import {execSync} from "child_process";
+import Purpur from "./purpur/Purpur";
+import Spigot from "./spigot/Spigot";
+import Paper from "./paper/Paper";
 
 async function start() {
     if (!fs.existsSync("./out")) {
@@ -10,10 +11,17 @@ async function start() {
     let spigot = new Spigot();
     await spigot.init();
 
+    let paper = new Paper();
+    await paper.init();
+
+    let purpur = new Purpur();
+    await purpur.init();
+
     console.log("Done!");
 }
-console.log(execSync("update-alternatives --display java").toString());
-console.log(execSync("ls /usr/lib/jvm/").toString());
+
+// console.log(execSync("update-alternatives --display java").toString());
+// console.log(execSync("ls /usr/lib/jvm/").toString());
 start();
 
 // let versions = ['1.17.1'];
