@@ -23,18 +23,7 @@ class Spigot {
         this.utils = new Utils();
     }
 
-    public async init() {
-        this.bt = new BuildTools();
-        await this.bt.init();
-
-        const versions = Spigot.getLocalVersions();
-        this.spigotVersions = versions.spigot;
-        this.craftBukkitVersions = versions.craftbukkit;
-        await this.updateVersions();
-        console.log("Spigot and Craftbukkit versions updated");
-    }
-
-    private static getLocalVersions(): { spigot: Array<Version>, craftbukkit: Array<Version> } {
+    private static async getLocalVersions(): Promise<{ spigot: Array<Version>, craftbukkit: Array<Version> }> {
         let existsSpigot = fs.existsSync('/root/app/out/spigot/versions.json');
         let existsCraftbukkit = fs.existsSync('/root/app/out/craftbukkit/versions.json');
         let spigotVersions: Array<Version> = [];
@@ -43,12 +32,30 @@ class Spigot {
 
         if (existsSpigot) {
             spigotVersions = JSON.parse(fs.readFileSync('/root/app/out/spigot/versions.json', 'utf8'));
+        } else {
+            if (process.env.S3_UPLOAD === "true") {
+                let rx = await axios.get('https://download.freemcserver.net/jar/spigot/versions.json');
+                fs.writeFileSync('/root/app/out/spigot/versions.json', JSON.stringify(rx.data));
+                spigotVersions = JSON.parse(fs.readFileSync('/root/app/out/spigot/versions.json', 'utf8'));
+                console.log('Updated spigot versions from remote server');
+            }
         }
         if (existsCraftbukkit) {
             craftBukkitVersions = JSON.parse(fs.readFileSync('/root/app/out/craftbukkit/versions.json', 'utf8'));
         }
         return {spigot: spigotVersions, craftbukkit: craftBukkitVersions};
 
+    }
+
+    public async init() {
+        this.bt = new BuildTools();
+        await this.bt.init();
+
+        const versions = await Spigot.getLocalVersions();
+        this.spigotVersions = versions.spigot;
+        this.craftBukkitVersions = versions.craftbukkit;
+        await this.updateVersions();
+        console.log("Spigot and Craftbukkit versions updated");
     }
 
     private async updateVersions() {
@@ -87,13 +94,6 @@ class Spigot {
                 let craftbukkitDir = "/root/app/out/craftbukkit/" + versionName + "/"
                 if (!fs.existsSync(craftbukkitDir)) {
                     fs.mkdirSync(craftbukkitDir);
-                }
-                if (!fs.existsSync('/root/app/out/spigot/versions.json')) {
-                    if (process.env.S3_UPLOAD === "true") {
-                        let rx = await axios.get('https://download.freemcserver.net/jar/spigot/versions.json');
-                        fs.writeFileSync('/root/app/out/spigot/versions.json', JSON.stringify(rx.data));
-                        console.log('Updated spigot versions from remote server');
-                    }
                 }
                 console.log("Updating version: " + versionName);
 
