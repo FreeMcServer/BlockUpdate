@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import axios from "axios";
-import Spigot from "./spigot";
 
 class BuildTools {
     private buildToolsApi: string = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json";
@@ -26,9 +25,9 @@ class BuildTools {
     }
 
     private static getBuildToolsVersion(): string {
-        let exists: boolean = fs.existsSync(`./out/buildtools/.version`);
+        let exists: boolean = fs.existsSync(`/root/app/out/buildtools/.version`);
         if (exists) {
-            return fs.readFileSync(`./out/buildtools/.version`, "utf8");
+            return fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8");
         } else {
             return "0";
         }
@@ -36,8 +35,8 @@ class BuildTools {
 
     private async downloadBuildTools(version: string): Promise<void> {
         let buildToolsUrl = `https://hub.spigotmc.org/jenkins/job/BuildTools/${version}/artifact/target/BuildTools.jar`;
-        let buildToolsPath = `./out/buildtools/BuildTools.jar`;
-        let buildToolsDir = `./out/buildtools`;
+        let buildToolsPath = `/root/app/out/buildtools/BuildTools.jar`;
+        let buildToolsDir = `/root/app/out/buildtools`;
 
         if (!fs.existsSync(buildToolsDir)) {
             fs.mkdirSync(buildToolsDir);
@@ -54,7 +53,7 @@ class BuildTools {
             response.data.pipe(fs.createWriteStream(buildToolsPath));
             response.data.on('end', () => {
                 console.log("BuildTools downloaded");
-                fs.writeSync(fs.openSync(`./out/buildtools/.version`, 'w'), version);
+                fs.writeSync(fs.openSync(`/root/app/out/buildtools/.version`, 'w'), version);
                 resolve();
             });
         });
