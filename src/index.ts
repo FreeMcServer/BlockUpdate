@@ -1,13 +1,14 @@
 import * as fs from "fs";
 import Paper from "./spigot/paper";
+import Spigot from "./spigot/spigot";
 
 async function start() {
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
 
-    // let spigot = new Spigot();
-    // await spigot.init();
+    let spigot = new Spigot();
+    await spigot.init();
 
     let paper = new Paper();
     await paper.init();
