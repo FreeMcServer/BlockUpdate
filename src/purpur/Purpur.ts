@@ -25,7 +25,7 @@ class Purpur {
             purpurVersions = JSON.parse(fs.readFileSync('/root/app/out/purpur/versions.json', 'utf8'));
         } else {
             if (process.env.S3_UPLOAD === "true") {
-                let rx = await axios.get('https://download.freemcserver.net/jar/purpur/versions.json');
+                let rx = await axios.get(process.env.S3_PULL_BASE + '/purpur/versions.json');
                 fs.writeFileSync('/root/app/out/purpur/versions.json', JSON.stringify(rx.data));
                 purpurVersions = JSON.parse(fs.readFileSync('/root/app/out/purpur/versions.json', 'utf8'));
                 console.log('Updated purpur versions from remote server');

@@ -25,7 +25,7 @@ class Paper {
             paperVersions = JSON.parse(fs.readFileSync('/root/app/out/paper/versions.json', 'utf8'));
         } else {
             if (process.env.S3_UPLOAD === "true") {
-                let rx = await axios.get('https://download.freemcserver.net/jar/paper/versions.json');
+                let rx = await axios.get(process.env.S3_PULL_BASE + '/paper/versions.json');
                 fs.writeFileSync('/root/app/out/paper/versions.json', JSON.stringify(rx.data));
                 paperVersions = JSON.parse(fs.readFileSync('/root/app/out/paper/versions.json', 'utf8'));
                 console.log('Updated paper versions from remote server');

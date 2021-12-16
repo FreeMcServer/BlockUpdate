@@ -34,7 +34,7 @@ class Spigot {
             spigotVersions = JSON.parse(fs.readFileSync('/root/app/out/spigot/versions.json', 'utf8'));
         } else {
             if (process.env.S3_UPLOAD === "true") {
-                let rx = await axios.get('https://download.freemcserver.net/jar/spigot/versions.json');
+                let rx = await axios.get(process.env.S3_PULL_BASE + '/spigot/versions.json');
                 fs.writeFileSync('/root/app/out/spigot/versions.json', JSON.stringify(rx.data));
                 spigotVersions = JSON.parse(fs.readFileSync('/root/app/out/spigot/versions.json', 'utf8'));
                 console.log('Updated spigot versions from remote server');
