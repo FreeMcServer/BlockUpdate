@@ -1,19 +1,22 @@
 import * as fs from "fs";
-import Spigot from "./spigot/spigot";
-import {execSync} from "child_process";
+import Paper from "./spigot/paper";
 
 async function start() {
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
 
-    let spigot = new Spigot();
-    await spigot.init();
+    // let spigot = new Spigot();
+    // await spigot.init();
+
+    let paper = new Paper();
+    await paper.init();
 
     console.log("Done!");
 }
-console.log(execSync("update-alternatives --display java").toString());
-console.log(execSync("ls /usr/lib/jvm/").toString());
+
+// console.log(execSync("update-alternatives --display java").toString());
+// console.log(execSync("ls /usr/lib/jvm/").toString());
 start();
 
 // let versions = ['1.17.1'];
