@@ -1,12 +1,13 @@
 
 node_modules/
-out/
 !out/.gitkeep
+out/
 
 *.js
 
 dist/
 
+!tmp/.gitkeep
 tmp/
 
 .idea/
