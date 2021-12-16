@@ -20,19 +20,19 @@ class Paper {
     }
 
     private static async getLocalVersions(): Promise<{ paper: Array<Version> }> {
-        let existsSpigot = fs.existsSync('/root/app/out/paper/versions.json');
+        let existsPaper = fs.existsSync('/root/app/out/paper/versions.json');
         let paperVersions: Array<Version> = [];
 
 
-        if (existsSpigot) {
+        if (existsPaper) {
             paperVersions = JSON.parse(fs.readFileSync('/root/app/out/paper/versions.json', 'utf8'));
         } else {
-            // if (process.env.S3_UPLOAD === "true") {
-            //     let rx = await axios.get('https://download.freemcserver.net/jar/paper/versions.json');
-            //     fs.writeFileSync('/root/app/out/paper/versions.json', JSON.stringify(rx.data));
-            //     paperVersions = JSON.parse(fs.readFileSync('/root/app/out/paper/versions.json', 'utf8'));
-            //     console.log('Updated spigot versions from remote server');
-            // }
+            if (process.env.S3_UPLOAD === "true") {
+                let rx = await axios.get('https://download.freemcserver.net/jar/paper/versions.json');
+                fs.writeFileSync('/root/app/out/paper/versions.json', JSON.stringify(rx.data));
+                paperVersions = JSON.parse(fs.readFileSync('/root/app/out/paper/versions.json', 'utf8'));
+                console.log('Updated paper versions from remote server');
+            }
         }
         return {paper: paperVersions};
 
