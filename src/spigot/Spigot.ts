@@ -12,6 +12,7 @@ class Spigot {
     public spigotVersions?: SpigotVersion[];
     public craftBukkitVersions?: SpigotVersion[];
     private utils: Utils;
+    private hasChanged = false;
 
     constructor() {
         if (!fs.existsSync("/root/app/out/spigot")) {
@@ -109,6 +110,7 @@ class Spigot {
                             fs.cpSync(spigotDir + 'craftbukkit-' + versionName + '.jar', '/root/app/out/craftbukkit/craftbukkit-' + versionName + '.jar');
                         }
                         // fs.unlinkSync(tmpDir);
+                        this.hasChanged = true;
                         fs.writeFileSync("/root/app/out/spigot/versions.json", JSON.stringify(this.spigotVersions));
                         fs.writeFileSync("/root/app/out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
                     }catch (e) {
@@ -130,9 +132,12 @@ class Spigot {
 
         fs.writeFileSync("/root/app/out/spigot/versions.json", JSON.stringify(this.spigotVersions));
         fs.writeFileSync("/root/app/out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
-        console.log("Spigot and Craftbukkit versions updated, ready to upload");
-        let uploader = new S3Uploader()
-        let rx = await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
+        console.log("Spigot and Craftbukkit versions updated");
+        if (this.hasChanged) {
+            console.log("Uploading Spigot");
+            let uploader = new S3Uploader()
+            let rx = await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
+        }
     }
 
 }

@@ -8,6 +8,7 @@ import PurpurVersion from "./PurpurVersion";
 class Purpur {
     public purpurVersions?: PurpurVersion[];
     private utils: Utils;
+    private hasChanged = false;
 
     constructor() {
         if (!fs.existsSync("/root/app/out/purpur")) {
@@ -49,7 +50,7 @@ class Purpur {
             const res = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName);
             let json = res.data;
             const latestVersion = json.builds.latest;
-            if (!this.purpurVersions!.find((v: PurpurVersion) => v.build === latestVersion)) {
+            if (!this.purpurVersions!.find((v: PurpurVersion) => v.build == latestVersion)) {
                 const build = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion);
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
@@ -71,6 +72,7 @@ class Purpur {
                 } else {
                     try {
                         await this.downloadFile("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion + "/download", dataDir + "purpur-" + versionName + ".jar");
+                        this.hasChanged = true;
                     } catch (e) {
                         console.log(e);
                     }
@@ -83,9 +85,12 @@ class Purpur {
         }
 
         fs.writeFileSync("/root/app/out/purpur/versions.json", JSON.stringify(this.purpurVersions));
-        console.log("Purpur versions updated, ready to upload");
-        let uploader = new S3Uploader()
-        let rx = await uploader.syncS3Storage('/root/app/out/purpur/', 'jar/purpur');
+        console.log("Purpur versions updated");
+        if (this.hasChanged) {
+            console.log("Uploading purpur");
+            let uploader = new S3Uploader()
+            let rx = await uploader.syncS3Storage('/root/app/out/purpur/', 'jar/purpur');
+        }
     }
 
     private downloadFile(fileUrl: string, destPath: string) {

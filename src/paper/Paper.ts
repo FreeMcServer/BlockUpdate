@@ -8,6 +8,7 @@ import PaperVersion from "./PaperVersion";
 class Paper {
     public paperVersions?: PaperVersion[];
     private utils: Utils;
+    private hasChanged = false;
 
     constructor() {
         if (!fs.existsSync("/root/app/out/paper")) {
@@ -71,6 +72,7 @@ class Paper {
                 } else {
                     try {
                         await this.downloadFile('https://papermc.io/api/v2/projects/paper/versions/' + versionName + '/builds/' + latestVersion + '/downloads/paper-' + versionName + '-' + latestVersion + '.jar', dataDir + "paper-" + versionName + ".jar");
+                        this.hasChanged = true;
                     } catch (e) {
                         console.log(e);
                     }
@@ -83,9 +85,13 @@ class Paper {
         }
 
         fs.writeFileSync("/root/app/out/paper/versions.json", JSON.stringify(this.paperVersions));
-        console.log("Paper versions updated, ready to upload");
-        let uploader = new S3Uploader()
-        let rx = await uploader.syncS3Storage('/root/app/out/paper/', 'jar/paper');
+        console.log("Paper versions updated");
+        if (this.hasChanged) {
+            console.log("Uploading Paper");
+            let uploader = new S3Uploader()
+            let rx = await uploader.syncS3Storage('/root/app/out/paper/', 'jar/paper');
+        }
+
     }
 
     private downloadFile(fileUrl: string, destPath: string) {
