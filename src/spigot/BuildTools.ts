@@ -9,6 +9,15 @@ class BuildTools {
         this.buildToolsVersion = BuildTools.getBuildToolsVersion();
     }
 
+    private static getBuildToolsVersion(): string {
+        let exists: boolean = fs.existsSync(`/root/app/out/buildtools/.version`);
+        if (exists) {
+            return fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8");
+        } else {
+            return "0";
+        }
+    }
+
     public async init() {
         await this.updateBuildTools();
     }
@@ -21,15 +30,6 @@ class BuildTools {
         } else {
             console.log("BuildTools is outdated, updating...");
             await this.downloadBuildTools(latestVersion);
-        }
-    }
-
-    private static getBuildToolsVersion(): string {
-        let exists: boolean = fs.existsSync(`/root/app/out/buildtools/.version`);
-        if (exists) {
-            return fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8");
-        } else {
-            return "0";
         }
     }
 
@@ -62,4 +62,5 @@ class BuildTools {
         await promise;
     }
 }
+
 export default BuildTools;

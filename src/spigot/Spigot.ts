@@ -8,9 +8,9 @@ import S3Uploader from "../s3/S3Uploader";
 
 // Spigot and Craftbukkit getter
 class Spigot {
-    private bt?: BuildTools;
     public spigotVersions?: SpigotVersion[];
     public craftBukkitVersions?: SpigotVersion[];
+    private bt?: BuildTools;
     private utils: Utils;
     private hasChanged = false;
 
@@ -113,7 +113,7 @@ class Spigot {
                         this.hasChanged = true;
                         fs.writeFileSync("/root/app/out/spigot/versions.json", JSON.stringify(this.spigotVersions));
                         fs.writeFileSync("/root/app/out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
-                    }catch (e) {
+                    } catch (e) {
                         console.log(e);
                         console.log("Well, it crashed");
                         let a = await execSync('cd ' + tmpDir + ' tail -n 20 /root/app/out/buildtools/BuildTools.log.txt');
@@ -141,4 +141,5 @@ class Spigot {
     }
 
 }
+
 export default Spigot;
