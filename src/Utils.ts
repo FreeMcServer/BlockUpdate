@@ -1,8 +1,9 @@
 import axios from "axios";
 import fs from "fs";
+import DiscordNotification from "./DiscordNotification";
 
 class Utils {
-    public static pendingMessages: string[] = [];
+    public static pendingMessages: DiscordNotification[] = [];
 
     // sort minecraft versions TODO: this doesnt work
     public static sortVersions(a: string, b: string): number {

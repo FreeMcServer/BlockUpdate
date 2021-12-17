@@ -22,6 +22,8 @@ deploy:
     - export S3_KEY="$S3_KEY"
     - export S3_SECRET="$S3_SECRET"
     - export S3_PULL_BASE=https://download.freemcserver.net/jar
+    - export DISCORD_WEBHOOK_ENABLE=true
+    - export DISCORD_WEBHOOK_URL="$DISCORD_WEBHOOK_URL"
     - cd /root/app && npm run run
   only:
     - deploy

@@ -21,10 +21,11 @@ async function start() {
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
         const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL ?? '');
         for (let msg in Utils.pendingMessages) {
+            const n = Utils.pendingMessages[msg];
             const embed = new MessageBuilder()
-                .setTitle('Version Updated')
+                .setTitle(n.title)
                 .setColor(2621184)
-                .setDescription(msg)
+                .setDescription(n.message)
                 .setTimestamp();
             hook.send(embed).then(r => console.log(r)).catch(e => console.log(e));
         }

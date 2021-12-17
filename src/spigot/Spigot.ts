@@ -5,6 +5,7 @@ import Utils from "../Utils";
 import SpigotVersion from "./SpigotVersion";
 import {execSync} from "child_process";
 import S3Uploader from "../s3/S3Uploader";
+import DiscordNotification from "../DiscordNotification";
 
 // Spigot and Craftbukkit getter
 class Spigot {
@@ -73,7 +74,7 @@ class Spigot {
             if (!this.spigotVersions!.find((v: SpigotVersion) => v.ref === json.refs.Spigot)) {
                 // @ts-ignore
                 this.spigotVersions = this.spigotVersions!.filter((v: SpigotVersion) => v.version !== versionName)
-                Utils.pendingMessages.push(`New Spigot version ${versionName} build #${json.refs.Spigot}`);
+                Utils.pendingMessages.push(new DiscordNotification(`Spigot ${versionName} updated!`, `SpigotC ${versionName} update to build \`${json.refs.Spigot}\`!`));
                 let javaVersionName: string;
                 let javaVersions: number[];
                 if (!json.javaVersions) {

@@ -3,6 +3,7 @@ import axios from "axios";
 import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
 import PurpurVersion from "./PurpurVersion";
+import DiscordNotification from "../DiscordNotification";
 
 // Purpur
 class Purpur {
@@ -53,7 +54,7 @@ class Purpur {
             if (!this.purpurVersions!.find((v: PurpurVersion) => v.build == Number.parseInt(latestVersion))) {
                 // @ts-ignore
                 this.purpurVersions = this.purpurVersions!.filter((v: PurpurVersion) => v.version !== versionName)
-                Utils.pendingMessages.push(`New Purpur version ${versionName} build #${latestVersion}`);
+                Utils.pendingMessages.push(new DiscordNotification(`PurpurMC ${versionName} updated!`, `PurpurMC ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');

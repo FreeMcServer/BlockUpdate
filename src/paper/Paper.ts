@@ -3,6 +3,7 @@ import axios from "axios";
 import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
 import PaperVersion from "./PaperVersion";
+import DiscordNotification from "../DiscordNotification";
 
 // PaperMC
 class Paper {
@@ -53,7 +54,7 @@ class Paper {
             if (!this.paperVersions!.find((v: PaperVersion) => v.build === Number.parseInt(latestVersion))) {
                 // @ts-ignore
                 this.paperVersions = this.paperVersions!.filter((v: PaperVersion) => v.version !== versionName)
-                Utils.pendingMessages.push(`New Paper version ${versionName} build #${latestVersion}`);
+                Utils.pendingMessages.push(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');
