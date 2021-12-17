@@ -51,14 +51,13 @@ class Purpur {
             let json = res.data;
             const latestVersion = json.builds.latest;
             if (!this.purpurVersions!.find((v: PurpurVersion) => v.build == latestVersion)) {
-                const build = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion);
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');
                     console.log("Created tmp dir");
                 }
 
-                let tmpDir = fs.mkdtempSync('/root/app/tmp/', 'utf-8');
+                fs.mkdtempSync('/root/app/tmp/', 'utf-8');
                 let dataDir = "/root/app/out/purpur/" + versionName + "/"
                 if (!fs.existsSync(dataDir)) {
                     fs.mkdirSync(dataDir);
@@ -71,7 +70,7 @@ class Purpur {
                     fs.writeFileSync(dataDir + "purpur-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
                     try {
-                        await this.downloadFile("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion + "/download", dataDir + "purpur-" + versionName + ".jar");
+                        await Utils.downloadFile("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestVersion + "/download", dataDir + "purpur-" + versionName + ".jar");
                         this.hasChanged = true;
                     } catch (e) {
                         console.log(e);
@@ -89,31 +88,10 @@ class Purpur {
         if (this.hasChanged) {
             console.log("Uploading purpur");
             let uploader = new S3Uploader()
-            let rx = await uploader.syncS3Storage('/root/app/out/purpur/', 'jar/purpur');
+            await uploader.syncS3Storage('/root/app/out/purpur/', 'jar/purpur');
         }
     }
 
-    private downloadFile(fileUrl: string, destPath: string) {
-
-        if (!fileUrl) return Promise.reject(new Error('Invalid fileUrl'));
-        if (!destPath) return Promise.reject(new Error('Invalid destPath'));
-
-        return new Promise<void>(async function (resolve, reject) {
-            await axios({
-                url: fileUrl,
-                method: 'GET',
-                responseType: 'stream'
-            }).then(function (response) {
-                response.data.pipe(fs.createWriteStream(destPath));
-                response.data.on('end', function () {
-                    console.log('File downloaded to ' + destPath);
-                    resolve();
-                });
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
-    }
 }
 
 export default Purpur;

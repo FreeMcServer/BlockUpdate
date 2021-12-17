@@ -136,7 +136,7 @@ class Spigot {
         if (this.hasChanged) {
             console.log("Uploading Spigot");
             let uploader = new S3Uploader()
-            let rx = await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
+            await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
         }
     }
 

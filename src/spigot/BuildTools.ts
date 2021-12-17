@@ -3,7 +3,7 @@ import axios from "axios";
 
 class BuildTools {
     private buildToolsApi: string = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json";
-    private buildToolsVersion: string;
+    private readonly buildToolsVersion: string;
 
     constructor() {
         this.buildToolsVersion = BuildTools.getBuildToolsVersion();
@@ -49,7 +49,7 @@ class BuildTools {
         const response = await axios.get(buildToolsUrl, {
             responseType: 'stream'
         });
-        const promise = new Promise<void>(function(resolve, reject) {
+        const promise = new Promise<void>(function (resolve) {
             response.data.pipe(fs.createWriteStream(buildToolsPath));
             response.data.on('end', () => {
                 console.log("BuildTools downloaded");

@@ -51,14 +51,13 @@ class Paper {
             let json = res.data;
             const latestVersion = json.builds.sort().reverse()[0];
             if (!this.paperVersions!.find((v: PaperVersion) => v.build === latestVersion)) {
-                const build = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName + "/builds/" + latestVersion);
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');
                     console.log("Created tmp dir");
                 }
 
-                let tmpDir = fs.mkdtempSync('/root/app/tmp/', 'utf-8');
+                fs.mkdtempSync('/root/app/tmp/', 'utf-8');
                 let dataDir = "/root/app/out/paper/" + versionName + "/"
                 if (!fs.existsSync(dataDir)) {
                     fs.mkdirSync(dataDir);
@@ -71,7 +70,7 @@ class Paper {
                     fs.writeFileSync(dataDir + "paper-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
                     try {
-                        await this.downloadFile('https://papermc.io/api/v2/projects/paper/versions/' + versionName + '/builds/' + latestVersion + '/downloads/paper-' + versionName + '-' + latestVersion + '.jar', dataDir + "paper-" + versionName + ".jar");
+                        await Utils.downloadFile('https://papermc.io/api/v2/projects/paper/versions/' + versionName + '/builds/' + latestVersion + '/downloads/paper-' + versionName + '-' + latestVersion + '.jar', dataDir + "paper-" + versionName + ".jar");
                         this.hasChanged = true;
                     } catch (e) {
                         console.log(e);
@@ -89,32 +88,12 @@ class Paper {
         if (this.hasChanged) {
             console.log("Uploading Paper");
             let uploader = new S3Uploader()
-            let rx = await uploader.syncS3Storage('/root/app/out/paper/', 'jar/paper');
+            await uploader.syncS3Storage('/root/app/out/paper/', 'jar/paper');
         }
 
     }
 
-    private downloadFile(fileUrl: string, destPath: string) {
 
-        if (!fileUrl) return Promise.reject(new Error('Invalid fileUrl'));
-        if (!destPath) return Promise.reject(new Error('Invalid destPath'));
-
-        return new Promise<void>(async function (resolve, reject) {
-            await axios({
-                url: fileUrl,
-                method: 'GET',
-                responseType: 'stream'
-            }).then(function (response) {
-                response.data.pipe(fs.createWriteStream(destPath));
-                response.data.on('end', function () {
-                    console.log('File downloaded to ' + destPath);
-                    resolve();
-                });
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
-    }
 }
 
 export default Paper;
