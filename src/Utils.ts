@@ -1,3 +1,6 @@
+import axios from "axios";
+import fs from "fs";
+
 class Utils {
     // sort minecraft versions TODO: this doesnt work
     public static sortVersions(a: string, b: string): number {
@@ -39,9 +42,31 @@ class Utils {
         return 0;
     }
 
+    public static downloadFile(fileUrl: string, destPath: string) {
+
+        if (!fileUrl) return Promise.reject(new Error('Invalid fileUrl'));
+        if (!destPath) return Promise.reject(new Error('Invalid destPath'));
+
+        return new Promise<void>(async function (resolve, reject) {
+            await axios({
+                url: fileUrl,
+                method: 'GET',
+                responseType: 'stream'
+            }).then(function (response) {
+                response.data.pipe(fs.createWriteStream(destPath));
+                response.data.on('end', function () {
+                    console.log('File downloaded to ' + destPath);
+                    resolve();
+                });
+            }).catch(function (error) {
+                reject(error);
+            });
+        });
+    }
+
     // class version to java version
     public getJavaVersion(classVersion: number): string {
-        let javaMap: { [key:number] : string } = {
+        let javaMap: { [key: number]: string } = {
             46: '1.2.0',
             47: '1.3.0',
             48: '1.4.0',

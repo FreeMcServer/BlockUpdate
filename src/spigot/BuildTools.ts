@@ -3,10 +3,19 @@ import axios from "axios";
 
 class BuildTools {
     private buildToolsApi: string = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json";
-    private buildToolsVersion: string;
+    private readonly buildToolsVersion: string;
 
     constructor() {
         this.buildToolsVersion = BuildTools.getBuildToolsVersion();
+    }
+
+    private static getBuildToolsVersion(): string {
+        let exists: boolean = fs.existsSync(`/root/app/out/buildtools/.version`);
+        if (exists) {
+            return fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8");
+        } else {
+            return "0";
+        }
     }
 
     public async init() {
@@ -21,15 +30,6 @@ class BuildTools {
         } else {
             console.log("BuildTools is outdated, updating...");
             await this.downloadBuildTools(latestVersion);
-        }
-    }
-
-    private static getBuildToolsVersion(): string {
-        let exists: boolean = fs.existsSync(`/root/app/out/buildtools/.version`);
-        if (exists) {
-            return fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8");
-        } else {
-            return "0";
         }
     }
 
@@ -49,7 +49,7 @@ class BuildTools {
         const response = await axios.get(buildToolsUrl, {
             responseType: 'stream'
         });
-        const promise = new Promise<void>(function(resolve, reject) {
+        const promise = new Promise<void>(function (resolve) {
             response.data.pipe(fs.createWriteStream(buildToolsPath));
             response.data.on('end', () => {
                 console.log("BuildTools downloaded");
@@ -62,4 +62,5 @@ class BuildTools {
         await promise;
     }
 }
+
 export default BuildTools;
