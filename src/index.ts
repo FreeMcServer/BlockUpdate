@@ -18,12 +18,6 @@ async function start() {
 
     let purpur = new Purpur();
     await purpur.init();
-
-    console.log("Done!");
-}
-
-
-start().then(() => {
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
         const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL ?? '');
         for (let msg in Utils.pendingMessages) {
@@ -35,9 +29,8 @@ start().then(() => {
             hook.send(embed).then(r => console.log(r)).catch(e => console.log(e));
         }
     }
+    console.log("Done!");
+}
 
-    process.exit(0);
-}).catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
+
+start();
