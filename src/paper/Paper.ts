@@ -50,7 +50,10 @@ class Paper {
             const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
             let json = res.data;
             const latestVersion = json.builds.sort().reverse()[0];
-            if (!this.paperVersions!.find((v: PaperVersion) => v.build === latestVersion)) {
+            if (!this.paperVersions!.find((v: PaperVersion) => v.build === Number.parseInt(latestVersion))) {
+                // @ts-ignore
+                this.paperVersions = this.paperVersions!.filter((v: PaperVersion) => v.version !== versionName)
+                Utils.pendingMessages.push(`New Paper version ${versionName} build #${latestVersion}`);
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');

@@ -2,6 +2,8 @@ import axios from "axios";
 import fs from "fs";
 
 class Utils {
+    public static pendingMessages: string[] = [];
+
     // sort minecraft versions TODO: this doesnt work
     public static sortVersions(a: string, b: string): number {
         const aSplit: Array<string> = a.split('.');

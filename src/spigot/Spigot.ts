@@ -71,6 +71,9 @@ class Spigot {
             const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
             let json = res.data;
             if (!this.spigotVersions!.find((v: SpigotVersion) => v.ref === json.refs.Spigot)) {
+                // @ts-ignore
+                this.spigotVersions = this.spigotVersions!.filter((v: SpigotVersion) => v.version !== versionName)
+                Utils.pendingMessages.push(`New Spigot version ${versionName} build #${json.refs.Spigot}`);
                 let javaVersionName: string;
                 let javaVersions: number[];
                 if (!json.javaVersions) {
