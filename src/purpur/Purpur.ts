@@ -51,6 +51,15 @@ class Purpur {
             const res = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName);
             let json = res.data;
             const latestVersion = json.builds.latest;
+            let dataDir = "/root/app/out/purpur/" + versionName + "/"
+            if (!fs.existsSync(dataDir)) {
+                fs.mkdirSync(dataDir);
+            }
+            const buildLabelPath = '/root/app/out/purpur/' + versionName + '/build.txt';
+            if (fs.existsSync(buildLabelPath)) {
+                fs.unlinkSync(buildLabelPath);
+            }
+            fs.writeFileSync(buildLabelPath, json.builds.latest);
             if (!this.purpurVersions!.find((v: PurpurVersion) => v.build == Number.parseInt(latestVersion))) {
                 // @ts-ignore
                 this.purpurVersions = this.purpurVersions!.filter((v: PurpurVersion) => v.version !== versionName)
@@ -62,10 +71,6 @@ class Purpur {
                 }
 
                 fs.mkdtempSync('/root/app/tmp/', 'utf-8');
-                let dataDir = "/root/app/out/purpur/" + versionName + "/"
-                if (!fs.existsSync(dataDir)) {
-                    fs.mkdirSync(dataDir);
-                }
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.

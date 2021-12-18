@@ -71,6 +71,15 @@ class Spigot {
         for (const versionName of latestVersions) {
             const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
             let json = res.data;
+            let spigotDir = "/root/app/out/spigot/" + versionName + "/"
+            if (!fs.existsSync(spigotDir)) {
+                fs.mkdirSync(spigotDir);
+            }
+            const buildLabelPath = '/root/app/out/spigot/' + versionName + '/build.txt';
+            if (fs.existsSync(buildLabelPath)) {
+                fs.unlinkSync(buildLabelPath);
+            }
+            fs.writeFileSync(buildLabelPath, json.refs.Spigot);
             if (!this.spigotVersions!.find((v: SpigotVersion) => v.ref === json.refs.Spigot)) {
                 // @ts-ignore
                 this.spigotVersions = this.spigotVersions!.filter((v: SpigotVersion) => v.version !== versionName)
