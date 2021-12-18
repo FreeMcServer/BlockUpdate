@@ -51,6 +51,15 @@ class Paper {
             const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
             let json = res.data;
             const latestVersion = json.builds.sort().reverse()[0];
+            let dataDir = "/root/app/out/paper/" + versionName + "/"
+            if (!fs.existsSync(dataDir)) {
+                fs.mkdirSync(dataDir);
+            }
+            const buildLabelPath = '/root/app/out/paper/' + versionName + '/build.txt';
+            if (fs.existsSync(buildLabelPath)) {
+                fs.unlinkSync(buildLabelPath);
+            }
+            fs.writeFileSync(buildLabelPath, latestVersion.toString());
             if (!this.paperVersions!.find((v: PaperVersion) => v.build === Number.parseInt(latestVersion))) {
                 // @ts-ignore
                 this.paperVersions = this.paperVersions!.filter((v: PaperVersion) => v.version !== versionName)
@@ -62,10 +71,6 @@ class Paper {
                 }
 
                 fs.mkdtempSync('/root/app/tmp/', 'utf-8');
-                let dataDir = "/root/app/out/paper/" + versionName + "/"
-                if (!fs.existsSync(dataDir)) {
-                    fs.mkdirSync(dataDir);
-                }
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.
