@@ -1,29 +1,37 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 docker-build:
   image: docker:latest
   stage: build
   services:
-    - docker:dind
+  - docker:dind
   before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+  - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
+  - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
   only:
-    - master
+  - master
 deploy:
   image: "$CI_REGISTRY_IMAGE:master"
   stage: deploy
   script:
-    - export DEBUG=false
-    - export S3_UPLOAD=true
-    - export S3_REGION=fr-par
-    - export S3_ENDPOINT=http://s3.fr-par.scw.cloud
-    - export S3_BUCKET=download.freemcserver.net
-    - export S3_KEY="$S3_KEY"
-    - export S3_SECRET="$S3_SECRET"
-    - export S3_PULL_BASE=https://download.freemcserver.net/jar
-    - export DISCORD_WEBHOOK_ENABLE=true
-    - export DISCORD_WEBHOOK_URL="$DISCORD_WEBHOOK_URL"
-    - cd /root/app && npm run run
+  - export DEBUG=false
+  - export S3_UPLOAD=true
+  - export S3_REGION=fr-par
+  - export S3_ENDPOINT=http://s3.fr-par.scw.cloud
+  - export S3_BUCKET=download.freemcserver.net
+  - export S3_KEY="$S3_KEY"
+  - export S3_SECRET="$S3_SECRET"
+  - export S3_PULL_BASE=https://download.freemcserver.net/jar
+  - export DISCORD_WEBHOOK_ENABLE=true
+  - export DISCORD_WEBHOOK_URL="$DISCORD_WEBHOOK_URL"
+  - cd /root/app && npm run run
   only:
-    - deploy
+  - deploy
+include:
+- template: Security/Dependency-Scanning.gitlab-ci.yml
