@@ -6,6 +6,8 @@ import {MessageBuilder, Webhook} from "discord-webhook-node";
 import Utils from "./Utils";
 
 async function start() {
+    console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer")
+
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
