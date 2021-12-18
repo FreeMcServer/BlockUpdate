@@ -13,7 +13,7 @@ Once you have all the tools installed, you can copy the .env.sample file and cal
 
 Once your environment variables are all setup, run the following command to get all jars (Please note this may take a while to run!).
 ```bash
-docker-compose -f docker-compose-dev.yml up -d
+docker-compose -f docker-compose-dev.yml up
 ```
 
 ## Contributing
