@@ -15,7 +15,7 @@ docker-build:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" -t "freemcservernet/blockupdate:latest" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
-    - docker push "freemcservernet/blockupdate:$CI_COMMIT_REF_SLUG"
+    - docker push "freemcservernet/blockupdate:latest"
   only:
   - master
 deploy:
