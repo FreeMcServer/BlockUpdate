@@ -55,7 +55,12 @@ class Paper {
         for (const versionName of res.data.versions) {
             const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
             let json = res.data;
-            const latestVersion = json.builds.sort().reverse()[0];
+            let latestVersion = -1;
+            for (const build of json.builds) {
+                if (build > latestVersion) {
+                    latestVersion = build;
+                }
+            }
             let dataDir = "/root/app/out/paper/" + versionName + "/"
             if (!fs.existsSync(dataDir)) {
                 fs.mkdirSync(dataDir);
