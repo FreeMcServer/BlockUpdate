@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   version-updater:
-    image: "registry.facha.dev/freemcserver/version-updater:master"
+    image: "freemcservernet/blockupdate"
     env_file:
       - .env
     volumes:
