@@ -70,7 +70,7 @@ class Paper {
                 fs.unlinkSync(buildLabelPath);
             }
             fs.writeFileSync(buildLabelPath, latestVersion.toString());
-            if (!this.paperVersions!.find((v: PaperVersion) => v.build === Number.parseInt(latestVersion))) {
+            if (!this.paperVersions!.find((v: PaperVersion) => v.build === latestVersion)) {
                 // @ts-ignore
                 this.paperVersions = this.paperVersions!.filter((v: PaperVersion) => v.version !== versionName)
                 Utils.pendingMessages.push(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));
