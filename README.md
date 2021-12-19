@@ -1,9 +1,13 @@
 # BlockUpdate
+
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 
 BlockUpdate is a TypeScript app to create a Minecraft version JAR download API.
 
 ## Usage
+
+An image is available on DockerHub on: https://hub.docker.com/r/freemcservernet/blockupdate
+
 First Clone the repository and cd into it.
 
 We require docker & docker-compose to use this for simplicity purposes. You can find information on how to download
