@@ -2,7 +2,7 @@
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 [![Pipeline Status](https://git.facha.dev/FreeMCServer/version-updater/badges/master/pipeline.svg)](https://git.facaha.dev/FreeMCServer/version-updater/-/commits/master)
 
-BlockUpdate is a TypeScript app for creating a Minecraft version JAR download API.
+BlockUpdate is a TypeScript app to create a Minecraft version JAR download API.
 
 ## Usage
 First Clone the repository and cd into it.

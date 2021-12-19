@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 import {execSync} from "child_process";
 
 

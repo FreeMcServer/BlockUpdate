@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
@@ -50,7 +55,12 @@ class Paper {
         for (const versionName of res.data.versions) {
             const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
             let json = res.data;
-            const latestVersion = json.builds.sort().reverse()[0];
+            let latestVersion = -1;
+            for (const build of json.builds) {
+                if (build > latestVersion) {
+                    latestVersion = build;
+                }
+            }
             let dataDir = "/root/app/out/paper/" + versionName + "/"
             if (!fs.existsSync(dataDir)) {
                 fs.mkdirSync(dataDir);
@@ -60,7 +70,7 @@ class Paper {
                 fs.unlinkSync(buildLabelPath);
             }
             fs.writeFileSync(buildLabelPath, latestVersion.toString());
-            if (!this.paperVersions!.find((v: PaperVersion) => v.build === Number.parseInt(latestVersion))) {
+            if (!this.paperVersions!.find((v: PaperVersion) => v.build === latestVersion)) {
                 // @ts-ignore
                 this.paperVersions = this.paperVersions!.filter((v: PaperVersion) => v.version !== versionName)
                 Utils.pendingMessages.push(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));

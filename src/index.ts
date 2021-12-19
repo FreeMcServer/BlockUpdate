@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 import * as fs from "fs";
 import Purpur from "./purpur/Purpur";
 import Spigot from "./spigot/Spigot";

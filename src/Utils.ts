@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 import axios from "axios";
 import fs from "fs";
 import DiscordNotification from "./DiscordNotification";
