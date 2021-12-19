@@ -17,7 +17,7 @@ Once your environment variables are all setup, run the following command to get 
 while to run!).
 
 ```bash
-docker-compose -f docker-compose-dev.yml up
+docker-compose up
 ```
 
 ## Env Variables
