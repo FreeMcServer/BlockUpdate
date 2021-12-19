@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 class DiscordNotification {
     public title: string;
     public message: string;

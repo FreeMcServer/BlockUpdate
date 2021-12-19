@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 import BuildTools from "./BuildTools";
 import * as fs from "fs";
 import axios from "axios";

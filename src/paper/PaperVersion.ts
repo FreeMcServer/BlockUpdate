@@ -1,3 +1,8 @@
+/*
+ * BlockUpdate
+ * Copyright (c) 2021. FreeMCServer
+ */
+
 class PaperVersion {
     public version: string;
     public snapshot: boolean;
