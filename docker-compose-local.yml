@@ -4,6 +4,6 @@ services:
     build: .
     env_file:
       - .env
-    command: "nodemon ./src/index.ts"
+    command: "node_modules/.bin/nodemon --watch src ./src/index.ts"
     volumes:
       - ./:/root/app

@@ -9,9 +9,10 @@ import Spigot from "./spigot/Spigot";
 import Paper from "./paper/Paper";
 import {MessageBuilder, Webhook} from "discord-webhook-node";
 import Utils from "./Utils";
+import Waterfall from "./waterfall/Waterfall";
+console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer")
 
 async function start() {
-    console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer")
 
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
@@ -22,6 +23,9 @@ async function start() {
 
     let paper = new Paper();
     await paper.init();
+
+    let waterfall = new Waterfall();
+    await waterfall.init();
 
     let purpur = new Purpur();
     await purpur.init();

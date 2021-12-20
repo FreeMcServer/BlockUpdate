@@ -152,6 +152,7 @@ class Spigot {
         fs.writeFileSync("/root/app/out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
         console.log("Spigot and Craftbukkit versions updated");
         if (this.hasChanged) {
+            //TODO: Upload craftbukkit too
             console.log("Uploading Spigot");
             let uploader = new S3Uploader()
             await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
