@@ -32,10 +32,14 @@ export default class Waterfall {
             waterfallVersions = JSON.parse(fs.readFileSync('/root/app/out/waterfall/versions.json', 'utf8'));
         } else {
             if (process.env.S3_UPLOAD === "true") {
-                let rx = await axios.get(process.env.S3_PULL_BASE + '/waterfall/versions.json');
-                fs.writeFileSync('/root/app/out/waterfall/versions.json', JSON.stringify(rx.data));
-                waterfallVersions = JSON.parse(fs.readFileSync('/root/app/out/waterfall/versions.json', 'utf8'));
-                console.log('Updated waterfall versions from remote server');
+                try {
+                    let rx = await axios.get(process.env.S3_PULL_BASE + '/waterfall/versions.json');
+                    fs.writeFileSync('/root/app/out/waterfall/versions.json', JSON.stringify(rx.data));
+                    waterfallVersions = JSON.parse(fs.readFileSync('/root/app/out/waterfall/versions.json', 'utf8'));
+                    console.log('Updated waterfall versions from remote server');
+                } catch (e) {
+                    console.warn("Failed to download waterfall versions.json", e);
+                }
             }
         }
         return { waterfall: waterfallVersions };
