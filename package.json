@@ -4,15 +4,15 @@
   "description": "version-updater",
   "main": "index.js",
   "dependencies": {
-    "@types/node": "^16.11.12",
     "axios": "^0.24.0",
     "discord-webhook-node": "^1.1.8",
-    "execa": "^6.0.0",
-    "typescript": "^4.5.3"
+    "execa": "^6.0.0"
   },
   "devDependencies": {
+    "@types/node": "^16.11.12",
     "nodemon": "^2.0.15",
-    "ts-node": "^10.4.0"
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
