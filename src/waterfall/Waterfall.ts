@@ -13,14 +13,12 @@ import Version from "../Version";
 // Waterfall Proxy
 export default class Waterfall {
     public waterfallVersions?: Version[];
-    private utils: Utils;
     private hasChanged = false;
 
     constructor() {
         if (!fs.existsSync("/root/app/out/waterfall")) {
             fs.mkdirSync("/root/app/out/waterfall");
         }
-        this.utils = new Utils();
     }
 
     private static async getLocalVersions(): Promise<{ waterfall: Version[] }> {
@@ -78,7 +76,7 @@ export default class Waterfall {
             if (!this.waterfallVersions!.find(v => v.build === latestVersion)) {
                 // @ts-ignore
                 this.waterfallVersions = this.waterfallVersions!.filter((v: WaterfallVersion) => v.version !== versionName)
-                Utils.pendingMessages.push(new DiscordNotification(`waterfallMC ${versionName} updated!`, `waterfallMC ${versionName} updated to build \`${latestVersion}\`!`));
+                Utils.discord.addPendingNotification(new DiscordNotification(`Waterfall ${versionName} updated!`, `Waterfall ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');
@@ -89,7 +87,7 @@ export default class Waterfall {
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.
-                if (this.utils.isDebug()) {
+                if (Utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
                     fs.writeFileSync(dataDir + "waterfall-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
@@ -101,7 +99,7 @@ export default class Waterfall {
                     }
 
                 }
-                let isSnapshot = !this.utils.isRelease(versionName);
+                let isSnapshot = !Utils.isRelease(versionName);
                 let waterfallVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
                 this.waterfallVersions!.push(waterfallVersion);
             }

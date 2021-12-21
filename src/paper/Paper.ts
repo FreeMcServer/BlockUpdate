@@ -13,14 +13,12 @@ import Version from "../Version";
 // PaperMC
 class Paper {
     public paperVersions?: Version[];
-    private utils: Utils;
     private hasChanged = false;
 
     constructor() {
         if (!fs.existsSync("/root/app/out/paper")) {
             fs.mkdirSync("/root/app/out/paper");
         }
-        this.utils = new Utils();
     }
 
     private static async getLocalVersions(): Promise<{ paper: Array<Version> }> {
@@ -73,7 +71,7 @@ class Paper {
             if (!this.paperVersions!.find(v => v.build === latestVersion)) {
                 // @ts-ignore
                 this.paperVersions = this.paperVersions!.filter(v => v.version !== versionName)
-                Utils.pendingMessages.push(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));
+                Utils.discord.addPendingNotification(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');
@@ -84,7 +82,7 @@ class Paper {
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.
-                if (this.utils.isDebug()) {
+                if (Utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
                     fs.writeFileSync(dataDir + "paper-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
@@ -96,7 +94,7 @@ class Paper {
                     }
 
                 }
-                let isSnapshot = !this.utils.isRelease(versionName);
+                let isSnapshot = !Utils.isRelease(versionName);
                 let paperVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
                 this.paperVersions!.push(paperVersion);
             }

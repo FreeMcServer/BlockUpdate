@@ -5,13 +5,17 @@
 
 import axios from "axios";
 import fs from "fs";
+import Discord from "./Discord";
 import DiscordNotification from "./DiscordNotification";
 
-class Utils {
-    public static pendingMessages: DiscordNotification[] = [];
+namespace Utils {
+    /** @deprecated */
+    export const pendingMessages: DiscordNotification[] = [];
+
+    export const discord = new Discord();
 
     // sort minecraft versions TODO: this doesnt work
-    public static sortVersions(a: string, b: string): number {
+    export function sortVersions(a: string, b: string): number {
         const aSplit: Array<string> = a.split('.');
         const bSplit: Array<string> = b.split('.');
         for (let i = 0; i < aSplit.length; i++) {
@@ -50,7 +54,7 @@ class Utils {
         return 0;
     }
 
-    public static downloadFile(fileUrl: string, destPath: string) {
+    export function downloadFile(fileUrl: string, destPath: string) {
 
         if (!fileUrl) return Promise.reject(new Error('Invalid fileUrl'));
         if (!destPath) return Promise.reject(new Error('Invalid destPath'));
@@ -66,42 +70,40 @@ class Utils {
                     console.log('File downloaded to ' + destPath);
                     resolve();
                 });
-            }).catch(function (error) {
-                reject(error);
-            });
+            }).catch(reject);
         });
     }
 
     // class version to java version
-    public getJavaVersion(classVersion: number): string {
-        let javaMap: { [key: number]: string } = {
-            46: '1.2.0',
-            47: '1.3.0',
-            48: '1.4.0',
-            49: '1.5.0',
-            50: '1.6.0',
-            51: '1.7.0', // Everything 7 and below doesnt matter.
-            52: '8',
-            53: '9',
-            54: '10',
-            55: '11',
-            56: '12',
-            57: '13',
-            58: '14',
-            59: '15',
-            60: '16',
-            61: '17',
-        };
-        return javaMap[classVersion];
+    export function getJavaVersion(classVersion: number): string {
+        switch (classVersion) {
+            case 46: return '1.2.0';
+            case 47: return '1.3.0';
+            case 48: return '1.4.0';
+            case 49: return '1.5.0';
+            case 50: return '1.6.0';
+            case 51: return '1.7.0'; // Everything 7 and below doesnt matter.
+            case 52: return '8';
+            case 53: return '9';
+            case 54: return '10';
+            case 55: return '11';
+            case 56: return '12';
+            case 57: return '13';
+            case 58: return '14';
+            case 59: return '15';
+            case 60: return '16';
+            case 61: return '17';
+            default: return "Unknown Java Version";
+        }
     }
 
     // check if version is release
-    public isRelease(version: string): boolean {
+    export function isRelease(version: string): boolean {
         return !version.includes('-') || version.split('.').length !== 0;
     }
 
     // check if debug mode
-    public isDebug(): boolean {
+    export function isDebug(): boolean {
         return process.env.DEBUG === 'true';
     }
 }

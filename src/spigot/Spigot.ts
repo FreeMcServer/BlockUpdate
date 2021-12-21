@@ -25,7 +25,6 @@ export default class Spigot {
     public spigotVersions?: Version[];
     public craftBukkitVersions?: Version[];
     private buildTools?: BuildTools;
-    private utils: Utils = new Utils();
     private hasChanged = false;
 
     private async getLocalVersions(): Promise<SpigotLocalVersions> {
@@ -102,7 +101,6 @@ export default class Spigot {
             // ... and ensure they are up to date.
             const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
             const json = res.data as SpigotVersionJson;
-
             const spigotDir = "/root/app/out/spigot/" + versionName + "/";
             if (!fs.existsSync(spigotDir)) {
                 fs.mkdirSync(spigotDir);
@@ -116,14 +114,14 @@ export default class Spigot {
             fs.writeFileSync(buildLabelPath, json.refs.Spigot);
 
             // Check if the hash is up to date with the local version
-            if (!this.spigotVersions!.find(v => v.ref === json.refs.Spigot)) {
+            if (!this.spigotVersions!.find(v => v.version == versionName && v.ref === json.refs.Spigot)) {
                 // If not, it needs to be updated.
 
                 // Remove the current version being updated as an updated version will later
                 // be pushed to the array.
                 this.spigotVersions = this.spigotVersions!.filter(v => v.version !== versionName);
 
-                Utils.pendingMessages.push(new DiscordNotification(`Spigot ${versionName} updated!`, `Spigot ${versionName} updated to build \`${json.refs.Spigot}\`!`));
+                Utils.discord.addPendingNotification(new DiscordNotification(`Spigot ${versionName} updated!`, `Spigot ${versionName} updated to build \`${json.refs.Spigot}\`!`));
 
                 // Find Java version
                 let javaVersionName: string;
@@ -140,7 +138,7 @@ export default class Spigot {
                             highestJavaVersion = javaVersion;
                         }
                     }
-                    javaVersionName = this.utils.getJavaVersion(highestJavaVersion);
+                    javaVersionName = Utils.getJavaVersion(highestJavaVersion);
                 }
 
                 // Create tmp dir
@@ -166,7 +164,7 @@ export default class Spigot {
                 const tmpDir = fs.mkdtempSync('/root/app/tmp/', 'utf-8');
 
                 // if debug mode, don't download, otherwise do.
-                if (this.utils.isDebug()) {
+                if (Utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
                     fs.writeFileSync(spigotDir + "spigot-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                     fs.writeFileSync(craftbukkitDir + "craftbukkit-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
@@ -194,7 +192,7 @@ export default class Spigot {
                     }
                 }
 
-                const isSnapshot = !this.utils.isRelease(versionName);
+                const isSnapshot = !Utils.isRelease(versionName);
                 const spigotBuild = Number.parseInt(json.name);
                 const spigotVersion = new Version(versionName, isSnapshot, spigotBuild, json.refs.Spigot, javaVersions);
                 this.spigotVersions!.push(spigotVersion);

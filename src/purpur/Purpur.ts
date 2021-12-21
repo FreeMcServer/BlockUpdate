@@ -13,14 +13,12 @@ import Version from "../Version";
 // Purpur
 class Purpur {
     public purpurVersions?: Version[];
-    private utils: Utils;
     private hasChanged = false;
 
     constructor() {
         if (!fs.existsSync("/root/app/out/purpur")) {
             fs.mkdirSync("/root/app/out/purpur");
         }
-        this.utils = new Utils();
     }
 
     private static async getLocalVersions(): Promise<{ purpur: Array<Version> }> {
@@ -68,7 +66,7 @@ class Purpur {
             if (!this.purpurVersions!.find(v => v.build == Number.parseInt(latestVersion))) {
                 // @ts-ignore
                 this.purpurVersions = this.purpurVersions!.filter(v => v.version !== versionName)
-                Utils.pendingMessages.push(new DiscordNotification(`PurpurMC ${versionName} updated!`, `PurpurMC ${versionName} updated to build \`${latestVersion}\`!`));
+                Utils.discord.addPendingNotification(new DiscordNotification(`PurpurMC ${versionName} updated!`, `PurpurMC ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
                     fs.mkdirSync('/root/app/tmp');
@@ -79,7 +77,7 @@ class Purpur {
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.
-                if (this.utils.isDebug()) {
+                if (Utils.isDebug()) {
                     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
                     fs.writeFileSync(dataDir + "purpur-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
@@ -91,7 +89,7 @@ class Purpur {
                     }
 
                 }
-                let isSnapshot = !this.utils.isRelease(versionName);
+                let isSnapshot = !Utils.isRelease(versionName);
                 let purpurVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
                 this.purpurVersions!.push(purpurVersion);
             }
