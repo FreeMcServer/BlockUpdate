@@ -12,6 +12,10 @@ import Waterfall from "./waterfall/Waterfall";
 
 console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer");
 
+if (Utils.isDebug()) {
+    console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
+}
+
 async function start() {
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");

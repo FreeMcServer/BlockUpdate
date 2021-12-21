@@ -10,7 +10,7 @@ export default class Version {
     public readonly snapshot: boolean;
     /** The build number for this build. */
     public readonly build: number;
-    /** The git hash for this build. */
+    /** The an identifiable reference for for this build. (For example a git hash) */
     public readonly ref: string;
     /** A list of compatible java versions. */
     public readonly javaVersions: number[];

@@ -72,13 +72,7 @@ class Paper {
                 // @ts-ignore
                 this.paperVersions = this.paperVersions!.filter(v => v.version !== versionName)
                 Utils.discord.addPendingNotification(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));
-                //create tmp dir
-                if (!fs.existsSync('/root/app/tmp')) {
-                    fs.mkdirSync('/root/app/tmp');
-                    console.log("Created tmp dir");
-                }
 
-                fs.mkdtempSync('/root/app/tmp/', 'utf-8');
                 console.log("Updating version: " + versionName + " build: " + latestVersion);
 
                 // if debug mode, don't download, otherwise do.

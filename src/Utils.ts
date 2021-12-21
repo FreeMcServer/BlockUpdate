@@ -9,8 +9,10 @@ import Discord from "./Discord";
 import DiscordNotification from "./DiscordNotification";
 
 namespace Utils {
-    /** @deprecated */
-    export const pendingMessages: DiscordNotification[] = [];
+    /**
+     * The root directory where all variants are placed. Ends with a slash.
+     */
+    export const ROOT = "/root/app/";
 
     export const discord = new Discord();
 
@@ -102,9 +104,29 @@ namespace Utils {
         return !version.includes('-') || version.split('.').length !== 0;
     }
 
+    export function isSnapshot(version: string): boolean {
+        return !Utils.isRelease(version);
+    }
+
     // check if debug mode
     export function isDebug(): boolean {
         return process.env.DEBUG === 'true';
+    }
+
+    export function isUsingS3(): boolean {
+        return process.env.S3_UPLOAD === 'true';
+    }
+
+    export function getS3Endpoint(): string {
+        if (isUsingS3()) {
+            if (process.env.S3_ENDPOINT) {
+                return process.env.S3_ENDPOINT
+            } else {
+                throw Error("S3 Endpoint is undefined. Please set the S3 endpoint in the '.env' file.")
+            }
+        } else {
+            throw Error("Getting S3 Endpoint without having S3 enabled. Somethings gone wrong...");
+        }
     }
 }
 
