@@ -8,7 +8,7 @@ import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
 import SpigotVersion from "./SpigotVersion";
-import {execSync} from "child_process";
+import { execSync } from "child_process";
 import S3Uploader from "../s3/S3Uploader";
 import DiscordNotification from "../DiscordNotification";
 
@@ -50,7 +50,7 @@ class Spigot {
         if (existsCraftbukkit) {
             craftBukkitVersions = JSON.parse(fs.readFileSync('/root/app/out/craftbukkit/versions.json', 'utf8'));
         }
-        return {spigot: spigotVersions, craftbukkit: craftBukkitVersions};
+        return { spigot: spigotVersions, craftbukkit: craftBukkitVersions };
 
     }
 
@@ -123,7 +123,7 @@ class Spigot {
                     fs.writeFileSync(craftbukkitDir + "craftbukkit-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
                 } else {
                     try {
-                        await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar /root/app/out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ' + spigotDir + ' && rm -rf ' + tmpDir, {stdio: 'ignore'});
+                        await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar /root/app/out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ' + spigotDir + ' && rm -rf ' + tmpDir, { stdio: 'ignore' });
                         if (fs.existsSync(spigotDir + 'craftbukkit-' + versionName + '.jar')) {
                             fs.cpSync(spigotDir + 'craftbukkit-' + versionName + '.jar', '/root/app/out/craftbukkit/craftbukkit-' + versionName + '.jar');
                         }

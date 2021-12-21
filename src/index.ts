@@ -7,7 +7,7 @@ import * as fs from "fs";
 import Purpur from "./purpur/Purpur";
 import Spigot from "./spigot/Spigot";
 import Paper from "./paper/Paper";
-import {MessageBuilder, Webhook} from "discord-webhook-node";
+import { MessageBuilder, Webhook } from "discord-webhook-node";
 import Utils from "./Utils";
 import Waterfall from "./waterfall/Waterfall";
 console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer")

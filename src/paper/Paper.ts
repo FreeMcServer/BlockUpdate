@@ -38,7 +38,7 @@ class Paper {
                 console.log('Updated paper versions from remote server');
             }
         }
-        return {paper: paperVersions};
+        return { paper: paperVersions };
 
     }
 

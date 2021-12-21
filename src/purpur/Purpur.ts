@@ -38,7 +38,7 @@ class Purpur {
                 console.log('Updated purpur versions from remote server');
             }
         }
-        return {purpur: purpurVersions};
+        return { purpur: purpurVersions };
 
     }
 
