@@ -7,12 +7,12 @@ import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
-import PurpurVersion from "./PurpurVersion";
 import DiscordNotification from "../DiscordNotification";
+import Version from "../Version";
 
 // Purpur
 class Purpur {
-    public purpurVersions?: PurpurVersion[];
+    public purpurVersions?: Version[];
     private utils: Utils;
     private hasChanged = false;
 
@@ -23,9 +23,9 @@ class Purpur {
         this.utils = new Utils();
     }
 
-    private static async getLocalVersions(): Promise<{ purpur: Array<PurpurVersion> }> {
+    private static async getLocalVersions(): Promise<{ purpur: Array<Version> }> {
         let existsPurpur = fs.existsSync('/root/app/out/purpur/versions.json');
-        let purpurVersions: Array<PurpurVersion> = [];
+        let purpurVersions: Array<Version> = [];
 
 
         if (existsPurpur) {
@@ -65,9 +65,9 @@ class Purpur {
                 fs.unlinkSync(buildLabelPath);
             }
             fs.writeFileSync(buildLabelPath, json.builds.latest);
-            if (!this.purpurVersions!.find((v: PurpurVersion) => v.build == Number.parseInt(latestVersion))) {
+            if (!this.purpurVersions!.find(v => v.build == Number.parseInt(latestVersion))) {
                 // @ts-ignore
-                this.purpurVersions = this.purpurVersions!.filter((v: PurpurVersion) => v.version !== versionName)
+                this.purpurVersions = this.purpurVersions!.filter(v => v.version !== versionName)
                 Utils.pendingMessages.push(new DiscordNotification(`PurpurMC ${versionName} updated!`, `PurpurMC ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
@@ -92,7 +92,7 @@ class Purpur {
 
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
-                let purpurVersion = new PurpurVersion(versionName, isSnapshot, latestVersion, [], '');
+                let purpurVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
                 this.purpurVersions!.push(purpurVersion);
             }
         }

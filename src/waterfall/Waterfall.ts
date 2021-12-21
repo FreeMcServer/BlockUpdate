@@ -7,12 +7,12 @@ import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
-import WaterfallVersion from "./WaterfallVersion";
 import DiscordNotification from "../DiscordNotification";
+import Version from "../Version";
 
 // Waterfall Proxy
-class Waterfall {
-    public waterfallVersions?: WaterfallVersion[];
+export default class Waterfall {
+    public waterfallVersions?: Version[];
     private utils: Utils;
     private hasChanged = false;
 
@@ -23,9 +23,9 @@ class Waterfall {
         this.utils = new Utils();
     }
 
-    private static async getLocalVersions(): Promise<{ waterfall: Array<WaterfallVersion> }> {
+    private static async getLocalVersions(): Promise<{ waterfall: Version[] }> {
         let existsWaterfall = fs.existsSync('/root/app/out/waterfall/versions.json');
-        let waterfallVersions: Array<WaterfallVersion> = [];
+        let waterfallVersions: Version[] = [];
 
 
         if (existsWaterfall) {
@@ -38,7 +38,7 @@ class Waterfall {
                 console.log('Updated waterfall versions from remote server');
             }
         }
-        return {waterfall: waterfallVersions};
+        return { waterfall: waterfallVersions };
 
     }
 
@@ -71,7 +71,7 @@ class Waterfall {
                 fs.unlinkSync(buildLabelPath);
             }
             fs.writeFileSync(buildLabelPath, latestVersion.toString());
-            if (!this.waterfallVersions!.find((v: WaterfallVersion) => v.build === latestVersion)) {
+            if (!this.waterfallVersions!.find(v => v.build === latestVersion)) {
                 // @ts-ignore
                 this.waterfallVersions = this.waterfallVersions!.filter((v: WaterfallVersion) => v.version !== versionName)
                 Utils.pendingMessages.push(new DiscordNotification(`waterfallMC ${versionName} updated!`, `waterfallMC ${versionName} updated to build \`${latestVersion}\`!`));
@@ -98,7 +98,7 @@ class Waterfall {
 
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
-                let waterfallVersion = new WaterfallVersion(versionName, isSnapshot, latestVersion, [], '');
+                let waterfallVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
                 this.waterfallVersions!.push(waterfallVersion);
             }
         }
@@ -112,8 +112,4 @@ class Waterfall {
         }
 
     }
-
-
 }
-
-export default Waterfall;

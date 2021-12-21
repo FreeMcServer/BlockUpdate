@@ -10,39 +10,45 @@ import Paper from "./paper/Paper";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import Utils from "./Utils";
 import Waterfall from "./waterfall/Waterfall";
-console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer")
+
+console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer");
 
 async function start() {
-
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
 
-    let spigot = new Spigot();
-    await spigot.init();
+    const spigot = new Spigot();
+    await spigot.run();
 
-    let paper = new Paper();
+    const paper = new Paper();
     await paper.init();
 
-    let waterfall = new Waterfall();
+    const waterfall = new Waterfall();
     await waterfall.init();
 
-    let purpur = new Purpur();
+    const purpur = new Purpur();
     await purpur.init();
+
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
         const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL ?? '');
-        for (let msg in Utils.pendingMessages) {
-            const n = Utils.pendingMessages[msg];
+
+        for (const message of Utils.pendingMessages) {
             const embed = new MessageBuilder()
-                .setTitle(n.title)
-                .setColor(2621184)
-                .setDescription(n.message)
+                .setTitle(message.title)
+                .setColor(0x27ff00)
+                .setDescription(message.message)
                 .setTimestamp();
-            hook.send(embed).then(r => console.log(r)).catch(e => console.log(e));
+
+            try {
+                await hook.send(embed);
+            } catch(e) {
+                console.error(e);
+            }
         }
     }
+
     console.log("Done!");
 }
-
 
 start();

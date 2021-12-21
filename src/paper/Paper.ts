@@ -7,12 +7,12 @@ import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
 import S3Uploader from "../s3/S3Uploader";
-import PaperVersion from "./PaperVersion";
 import DiscordNotification from "../DiscordNotification";
+import Version from "../Version";
 
 // PaperMC
 class Paper {
-    public paperVersions?: PaperVersion[];
+    public paperVersions?: Version[];
     private utils: Utils;
     private hasChanged = false;
 
@@ -23,9 +23,9 @@ class Paper {
         this.utils = new Utils();
     }
 
-    private static async getLocalVersions(): Promise<{ paper: Array<PaperVersion> }> {
+    private static async getLocalVersions(): Promise<{ paper: Array<Version> }> {
         let existsPaper = fs.existsSync('/root/app/out/paper/versions.json');
-        let paperVersions: Array<PaperVersion> = [];
+        let paperVersions: Array<Version> = [];
 
 
         if (existsPaper) {
@@ -70,9 +70,9 @@ class Paper {
                 fs.unlinkSync(buildLabelPath);
             }
             fs.writeFileSync(buildLabelPath, latestVersion.toString());
-            if (!this.paperVersions!.find((v: PaperVersion) => v.build === latestVersion)) {
+            if (!this.paperVersions!.find(v => v.build === latestVersion)) {
                 // @ts-ignore
-                this.paperVersions = this.paperVersions!.filter((v: PaperVersion) => v.version !== versionName)
+                this.paperVersions = this.paperVersions!.filter(v => v.version !== versionName)
                 Utils.pendingMessages.push(new DiscordNotification(`PaperMC ${versionName} updated!`, `PaperMC ${versionName} updated to build \`${latestVersion}\`!`));
                 //create tmp dir
                 if (!fs.existsSync('/root/app/tmp')) {
@@ -97,7 +97,7 @@ class Paper {
 
                 }
                 let isSnapshot = !this.utils.isRelease(versionName);
-                let paperVersion = new PaperVersion(versionName, isSnapshot, latestVersion, [], '');
+                let paperVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
                 this.paperVersions!.push(paperVersion);
             }
         }
