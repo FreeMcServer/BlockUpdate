@@ -58,13 +58,20 @@ export default abstract class Variant {
     }
 
     public async init() {
+        await this.mkdir()
         this.localVersions = await this.getLocalVersions();
+
+        await this.update();
+
+        await this.writeLocalVersions();
+
+        console.log(`${this.name} versions updated.`);
     }
 
     /**
      * Create directories if they don't exist.
      */
-    public mkdirs() {
+    public mkdir() {
         if (!fs.existsSync("/root/app/out/" + this.id)) {
             fs.mkdirSync("/root/app/out/" + this.id);
         }
@@ -173,7 +180,7 @@ export default abstract class Variant {
                 this.downloadVersion(latestVersion);
 
                 // Write version.json
-                this.writeVersionJson(latestVersion);
+                this.writeVersionMeta(latestVersion);
 
                 // Remove the old version from local versions (if it exists).
                 const index = this.localVersions.findIndex(v => v.version == versionName);
@@ -219,12 +226,13 @@ export default abstract class Variant {
     }
 
     /**
-     * Write the version.json for the version.
+     * Write the version.json and build.txt for the version.
      * 
      * @param version The version.
      */
-    public writeVersionJson(version: Version) {
+    public writeVersionMeta(version: Version) {
         fs.writeFileSync(this.variantPath + version.version + "/version.json", JSON.stringify(version));
+        fs.writeFileSync(this.variantPath + version.version + "/build.txt", version.ref);
     }
 
     /**

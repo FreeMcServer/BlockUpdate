@@ -74,7 +74,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 
-[GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
+[GPL-3.0-or-later](https://choosealicense.com/licenses/gpl-3.0/)
 
 ## Authors
 

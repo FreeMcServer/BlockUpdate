@@ -6,7 +6,8 @@
   "dependencies": {
     "axios": "^0.24.0",
     "discord-webhook-node": "^1.1.8",
-    "execa": "^6.0.0"
+    "execa": "^6.0.0",
+    "fast-xml-parser": "^4.0.0-beta.8"
   },
   "devDependencies": {
     "@types/node": "^16.11.12",
@@ -24,5 +25,5 @@
     "url": "git@github.com:FreeMcServer/BlockUpdate.git"
   },
   "author": "Facha",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0-or-later"
 }

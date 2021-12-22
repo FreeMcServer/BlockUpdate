@@ -101,7 +101,8 @@ namespace Utils {
 
     // check if version is release
     export function isRelease(version: string): boolean {
-        return !version.includes('-') || version.split('.').length !== 0;
+        // If version doesnt incluide a "-" then true, and then if it has any dots in it, then true
+        return !version.includes('-') && version.split('.').length > 0;
     }
 
     export function isSnapshot(version: string): boolean {

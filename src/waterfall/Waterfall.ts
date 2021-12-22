@@ -55,7 +55,6 @@ export default class Waterfall {
     private async updateVersions() {
         const res = await axios.get("https://papermc.io/api/v2/projects/waterfall");
         for (const versionName of res.data.versions) {
-            console.log("Checking version " + versionName);
             const res = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName);
             let json = res.data;
             let latestVersion = -1;
