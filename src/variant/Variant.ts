@@ -5,7 +5,7 @@
 
 import axios, { AxiosError } from "axios";
 import * as fs from "fs";
-import DiscordNotification from "../DiscordNotification";
+import DiscordNotification from "../discord/DiscordNotification";
 import S3Uploader from "../s3/S3Uploader";
 import Utils from "../Utils";
 import Version from "../Version";

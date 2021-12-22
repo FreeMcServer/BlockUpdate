@@ -10,7 +10,7 @@ import Utils from "../Utils";
 import Version from "../Version";
 import { execSync } from "child_process";
 import S3Uploader from "../s3/S3Uploader";
-import DiscordNotification from "../DiscordNotification";
+import DiscordNotification from "../discord/DiscordNotification";
 import SpigotVersionJson from "./SpigotVersionJson";
 
 interface SpigotLocalVersions {
@@ -69,7 +69,7 @@ export default class Spigot {
 
         // Ensure BuildTools is up to date.
         this.buildTools = new BuildTools();
-        await this.buildTools.init();
+        await this.buildTools.update();
 
         const versions = await this.getLocalVersions();
         this.spigotVersions = versions.spigot;
