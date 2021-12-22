@@ -31,22 +31,22 @@ export default abstract class Variant {
     /**
      * All versions already downloaded locally.
      */
-    private localVersions: Version[];
+    public localVersions: Version[];
 
     /**
      * Path to the directory of this variant. Ends with a slash.
      */
-    private readonly variantPath: string;
+    public readonly variantPath: string;
 
     /**
      * Path to the versions.json file for this variant.
      */
-    private readonly versionsJsonPath: string;
+    public readonly versionsJsonPath: string;
 
     /**
      * Whether local versions have been updated.
      */
-    private hasChanges = false;
+    public hasChanges = false;
 
     constructor(id: string, name: string) {
         this.id = id;
@@ -62,8 +62,8 @@ export default abstract class Variant {
      * Create directories if they don't exist.
      */
     public mkdir() {
-        if (!fs.existsSync("/root/app/out/" + this.id)) {
-            fs.mkdirSync("/root/app/out/" + this.id);
+        if (!fs.existsSync(this.variantPath)) {
+            fs.mkdirSync(this.variantPath);
         }
     }
 

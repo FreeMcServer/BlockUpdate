@@ -114,6 +114,22 @@ namespace Utils {
         return higest;
     }
 
+    /**
+     * Get the lowest number in the array.
+     *
+     * @param numbers The array of numbers.
+     * @returns The lowest number.
+     */
+    export function getLowestNumber(numbers: number[]): number {
+        let lowest = Number.MAX_VALUE;
+        for (const value of numbers) {
+            if (value < lowest) {
+                lowest = value;
+            }
+        }
+        return lowest;
+    }
+
     // check if version is release
     export function isRelease(version: string): boolean {
         // If version doesnt incluide a "-" then true, and then if it has any dots in it, then true
