@@ -57,17 +57,6 @@ export default abstract class Variant {
         this.versionsJsonPath = this.variantPath + `versions.json`;
     }
 
-    public async init() {
-        await this.mkdir()
-        this.localVersions = await this.getLocalVersions();
-
-        await this.update();
-
-        await this.writeLocalVersions();
-
-        console.log(`${this.name} versions updated.`);
-    }
-
     /**
      * Create directories if they don't exist.
      */
@@ -164,6 +153,10 @@ export default abstract class Variant {
      * Check for updates and update the outdated local variants.
      */
     public async update() {
+        // Setup
+        await this.mkdir();
+        this.localVersions = await this.getLocalVersions();
+
         // Get all versions
         const latestVersionNames = await this.getLatestVersions();
         
@@ -200,6 +193,9 @@ export default abstract class Variant {
         if (Utils.isUsingS3()) {
             this.uploadChanges();
         }
+
+        await this.writeLocalVersions();
+        console.log(`${this.name} versions updated.`);
     }
 
     /**

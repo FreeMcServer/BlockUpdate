@@ -99,6 +99,22 @@ namespace Utils {
         }
     }
 
+    /**
+     * Get the higest positive number in the array.
+     *
+     * @param numbers The array of numbers.
+     * @returns The highest number.
+     */
+    export function getHighestNumber(numbers: number[]): number {
+        let higest = -1;
+        for (const value of numbers) {
+            if (value > higest) {
+                higest = value;
+            }
+        }
+        return higest;
+    }
+
     // check if version is release
     export function isRelease(version: string): boolean {
         // If version doesnt incluide a "-" then true, and then if it has any dots in it, then true

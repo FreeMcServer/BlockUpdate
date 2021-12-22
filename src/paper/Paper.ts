@@ -3,15 +3,11 @@
  * Copyright (c) 2021. FreeMCServer
  */
 
-import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
-import S3Uploader from "../s3/S3Uploader";
-import DiscordNotification from "../DiscordNotification";
 import Version from "../Version";
 import Variant from "../variant/Variant";
 
-// PaperMC
 export default class Paper extends Variant {
     constructor() {
         super("paper", "Paper");
@@ -26,12 +22,7 @@ export default class Paper extends Variant {
         const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
         let json = res.data;
 
-        let latestBuild = -1;
-        for (const build of json.builds) {
-            if (build > latestBuild) {
-                latestBuild = build;
-            }
-        }
+        const latestBuild = Utils.getHighestNumber(json.builds);
 
         const buildRes = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName + "/builds/" + latestBuild);
 

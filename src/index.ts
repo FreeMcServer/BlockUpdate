@@ -25,7 +25,7 @@ async function start() {
     await spigot.run();
 
     const paper = new Paper();
-    await paper.init();
+    await paper.update();
 
     const waterfall = new Waterfall();
     await waterfall.init();
