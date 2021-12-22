@@ -5,8 +5,7 @@
 
 import axios from "axios";
 import fs from "fs";
-import Discord from "./Discord";
-import DiscordNotification from "./DiscordNotification";
+import Discord from "./discord/Discord";
 
 namespace Utils {
     /**
