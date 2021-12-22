@@ -7,7 +7,8 @@
     "axios": "^0.24.0",
     "discord-webhook-node": "^1.1.8",
     "execa": "^6.0.0",
-    "fast-xml-parser": "^4.0.0-beta.8"
+    "fast-xml-parser": "^4.0.0-beta.8",
+    "jszip": "^3.7.1"
   },
   "devDependencies": {
     "@types/node": "^16.11.12",
