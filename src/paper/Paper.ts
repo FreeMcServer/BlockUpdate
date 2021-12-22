@@ -15,7 +15,7 @@ export default class Paper extends Variant {
 
     public async getLatestVersions(): Promise<string[]> {
         const res = await axios.get("https://papermc.io/api/v2/projects/paper/");
-        return res.data.versions as string[];
+        return res.data.versions;
     }
 
     public async getLatestBuild(versionName: string): Promise<Version> {

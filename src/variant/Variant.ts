@@ -5,6 +5,7 @@
 
 import axios, { AxiosError } from "axios";
 import * as fs from "fs";
+import DiscordNotification from "../DiscordNotification";
 import S3Uploader from "../s3/S3Uploader";
 import Utils from "../Utils";
 import Version from "../Version";
@@ -186,6 +187,17 @@ export default abstract class Variant {
 
                 // Local versions have been updated so update hasChanges
                 this.hasChanges = true;
+
+                // Add a discord notification
+                Utils.discord.addPendingNotification(
+                    new DiscordNotification(
+                        `${this.name} ${versionName} updated!`,
+                        `${this.name} ${versionName} updated to build ${latestVersion.build}`
+                    )
+                );
+
+                // Console notification
+                console.log(`Updated ${this.name} ${versionName} to build ${latestVersion.build}`);
             }
         }
 

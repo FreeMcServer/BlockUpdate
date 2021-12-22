@@ -3,114 +3,41 @@
  * Copyright (c) 2021. FreeMCServer
  */
 
-import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
-import S3Uploader from "../s3/S3Uploader";
-import DiscordNotification from "../DiscordNotification";
 import Version from "../Version";
+import Variant from "../variant/Variant";
 
 // Waterfall Proxy
-export default class Waterfall {
-    public waterfallVersions?: Version[];
-    private hasChanged = false;
-
+export default class Waterfall extends Variant {
     constructor() {
-        if (!fs.existsSync("/root/app/out/waterfall")) {
-            fs.mkdirSync("/root/app/out/waterfall");
-        }
+        super("waterfall", "Waterfall");
     }
 
-    private static async getLocalVersions(): Promise<{ waterfall: Version[] }> {
-        let existsWaterfall = fs.existsSync('/root/app/out/waterfall/versions.json');
-        let waterfallVersions: Version[] = [];
-
-
-        if (existsWaterfall) {
-            waterfallVersions = JSON.parse(fs.readFileSync('/root/app/out/waterfall/versions.json', 'utf8'));
-        } else {
-            if (process.env.S3_UPLOAD === "true") {
-                try {
-                    let rx = await axios.get(process.env.S3_PULL_BASE + '/waterfall/versions.json');
-                    fs.writeFileSync('/root/app/out/waterfall/versions.json', JSON.stringify(rx.data));
-                    waterfallVersions = JSON.parse(fs.readFileSync('/root/app/out/waterfall/versions.json', 'utf8'));
-                    console.log('Updated waterfall versions from remote server');
-                } catch (e) {
-                    console.warn("Failed to download waterfall versions.json", e);
-                }
-            }
-        }
-        return { waterfall: waterfallVersions };
-
-    }
-
-    public async init() {
-
-        const versions = await Waterfall.getLocalVersions();
-        this.waterfallVersions = versions.waterfall;
-        await this.updateVersions();
-        console.log("Waterfall versions updated");
-    }
-
-    private async updateVersions() {
+    public async getLatestVersions(): Promise<string[]> {
         const res = await axios.get("https://papermc.io/api/v2/projects/waterfall");
-        for (const versionName of res.data.versions) {
-            const res = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName);
-            let json = res.data;
-            let latestVersion = -1;
-            for (const build of json.builds) {
-                if (build > latestVersion) {
-                    latestVersion = build;
-                }
-            }
-            let dataDir = "/root/app/out/waterfall/" + versionName + "/"
-            if (!fs.existsSync(dataDir)) {
-                fs.mkdirSync(dataDir);
-            }
-            const buildLabelPath = '/root/app/out/waterfall/' + versionName + '/build.txt';
-            if (fs.existsSync(buildLabelPath)) {
-                fs.unlinkSync(buildLabelPath);
-            }
-            fs.writeFileSync(buildLabelPath, latestVersion.toString());
-            if (!this.waterfallVersions!.find(v => v.build === latestVersion)) {
-                // @ts-ignore
-                this.waterfallVersions = this.waterfallVersions!.filter((v: WaterfallVersion) => v.version !== versionName)
-                Utils.discord.addPendingNotification(new DiscordNotification(`Waterfall ${versionName} updated!`, `Waterfall ${versionName} updated to build \`${latestVersion}\`!`));
-                //create tmp dir
-                if (!fs.existsSync('/root/app/tmp')) {
-                    fs.mkdirSync('/root/app/tmp');
-                    console.log("Created tmp dir");
-                }
+        return res.data.versions;
+    }
 
-                fs.mkdtempSync('/root/app/tmp/', 'utf-8');
-                console.log("Updating version: " + versionName + " build: " + latestVersion);
+    public async getLatestBuild(versionName: string): Promise<Version> {
+        const res = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName);
+        let json = res.data;
 
-                // if debug mode, don't download, otherwise do.
-                if (Utils.isDebug()) {
-                    console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
-                    fs.writeFileSync(dataDir + "waterfall-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
-                } else {
-                    try {
-                        await Utils.downloadFile('https://papermc.io/api/v2/projects/waterfall/versions/' + versionName + '/builds/' + latestVersion + '/downloads/waterfall-' + versionName + '-' + latestVersion + '.jar', dataDir + "waterfall-" + versionName + ".jar");
-                        this.hasChanged = true;
-                    } catch (e) {
-                        console.log(e);
-                    }
+        const latestBuild = Utils.getHighestNumber(json.builds);
 
-                }
-                let isSnapshot = !Utils.isRelease(versionName);
-                let waterfallVersion = new Version(versionName, isSnapshot, latestVersion, '', []);
-                this.waterfallVersions!.push(waterfallVersion);
-            }
-        }
+        const buildRes = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName + "/builds/" + latestBuild);
 
-        fs.writeFileSync("/root/app/out/waterfall/versions.json", JSON.stringify(this.waterfallVersions));
-        console.log("Waterfall versions updated");
-        if (this.hasChanged) {
-            console.log("Uploading Waterfall");
-            let uploader = new S3Uploader()
-            await uploader.syncS3Storage('/root/app/out/waterfall/', 'jar/waterfall');
-        }
+        const isSnapshot = Utils.isSnapshot(versionName);
+        const ref = buildRes.data.changes[0].commit;
+        const javaVersions: number[] = []; // TODO
+        return new Version(versionName, isSnapshot, latestBuild, ref, javaVersions);
+    }
 
+    public usesDownload(): boolean {
+        return true;
+    }
+
+    public getDownloadLink(version: Version): string {
+        return `https://papermc.io/api/v2/projects/waterfall/versions/${version.version}/builds/${version.build}/downloads/waterfall-${version.version}-${version.build}.jar`;
     }
 }

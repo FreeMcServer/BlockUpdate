@@ -28,10 +28,10 @@ async function start() {
     await paper.update();
 
     const waterfall = new Waterfall();
-    await waterfall.init();
+    await waterfall.update();
 
     const purpur = new Purpur();
-    await purpur.init();
+    await purpur.update();
 
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
         // Send pending messages
