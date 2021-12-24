@@ -22,7 +22,7 @@ async function start() {
     }
 
     const spigot = new Spigot();
-    await spigot.run();
+    await spigot.update();
 
     const paper = new Paper();
     await paper.update();
