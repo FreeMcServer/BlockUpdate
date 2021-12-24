@@ -30,7 +30,17 @@ export default class Purpur extends Variant {
         const isSnapshot = Utils.isSnapshot(versionName);
         const ref = buildRes.data.commits[0].hash;
         const javaVersions: number[] = []; // TODO
-        return new Version(versionName, isSnapshot, latestBuild, ref, javaVersions);
+        return {
+            version: versionName,
+            snapshot: isSnapshot,
+            build: latestBuild,
+            ref: ref,
+            javaVersions: javaVersions,
+            hash: {
+                type: "md5",
+                hash: buildRes.data.md5
+            }
+        };
     }
 
     public usesDownload(): boolean {

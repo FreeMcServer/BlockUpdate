@@ -29,7 +29,17 @@ export default class Paper extends Variant {
         const isSnapshot = Utils.isSnapshot(versionName);
         const ref = buildRes.data.changes[0].commit;
         const javaVersions: number[] = []; // TODO
-        return new Version(versionName, isSnapshot, latestBuild, ref, javaVersions);
+        return {
+            version: versionName,
+            snapshot: isSnapshot,
+            build: latestBuild,
+            ref: ref,
+            javaVersions: javaVersions,
+            hash: {
+                type: "sha256",
+                hash: buildRes.data.downloads.application.sha256
+            }
+        };
     }
 
     public usesDownload(): boolean {

@@ -73,7 +73,13 @@ export default class Spigot extends Variant {
 
         const isSnapshot = Utils.isSnapshot(versionName);
         const build = Number.parseInt(json.name);
-        return new Version(versionName, isSnapshot, build, json.refs.Spigot, javaVersions);
+        return {
+            version: versionName,
+            snapshot: isSnapshot,
+            build: build,
+            ref: json.refs.Spigot,
+            javaVersions: javaVersions
+        };
     }
 
     public isUpToDate(localVersion: Version, remoteVersion: Version): boolean {
