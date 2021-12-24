@@ -8,6 +8,10 @@ export default class Discord {
         this.pendingMessages.push(notification);
     }
 
+    hasPendingMessages(): boolean {
+        return this.pendingMessages.length > 0;
+    }
+
     /**
      * Send all pending discord notifications.
      */

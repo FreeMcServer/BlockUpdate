@@ -9,6 +9,8 @@ import Spigot from "./spigot/Spigot";
 import Paper from "./paper/Paper";
 import Utils from "./Utils";
 import Waterfall from "./waterfall/Waterfall";
+import { getReruns } from "./fix/manualFixImpl";
+import "./ManualFix";
 
 console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer");
 
@@ -33,9 +35,13 @@ async function start() {
     const spigot = new Spigot();
     await spigot.update();
 
-    if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
-        // Send pending messages
-        Utils.discord.send();
+    if (process.env.DISCORD_WEBHOOK_ENABLE == 'true' && Utils.discord.hasPendingMessages()) {
+        if (getReruns().length > 0) {
+            console.log("Manual reruns have ran, skipping to send discord notifications.");
+        } else {
+            // Send pending messages
+            Utils.discord.send();
+        }
     }
 
     console.log("Done!");

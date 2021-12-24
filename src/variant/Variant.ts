@@ -7,6 +7,7 @@ import axios, { AxiosError } from "axios";
 import { createHash } from "crypto";
 import * as fs from "fs";
 import DiscordNotification from "../discord/DiscordNotification";
+import { shouldManuallyRerun } from "../fix/manualFixImpl";
 import S3Uploader from "../s3/S3Uploader";
 import Utils from "../Utils";
 import Version from "../Version";
@@ -121,6 +122,14 @@ export default abstract class Variant {
      * @returns Whether the local version is up to date.
      */
     public isUpToDate(localVersion: Version, remoteVersion: Version): boolean {
+        // Check if a manual rerun has been scheduled for this variant and version
+        if (shouldManuallyRerun(this.id, localVersion.version)) {
+            // In that case, flag the version as out of date so it gets rebuilt.
+            console.log(`Manually rerunning ${this.name} ${localVersion.version}.`);
+            return false;
+        }
+        // Check if the version, build and ref are all equal. In that case the local
+        // version is up to date with the remote (latest) one.
         return localVersion.version == remoteVersion.version
         && localVersion.build == remoteVersion.build
         && localVersion.ref == remoteVersion.ref;
@@ -254,7 +263,8 @@ export default abstract class Variant {
                 }
             }
             if (attempts > 3) {
-                console.warn(`Failed to download ${this.name} ${version.version} after three attempts.`);
+                // Crash the application
+                throw new Error(`Failed to download ${this.name} ${version.version} after three attempts.`);
             }
         }
     }
