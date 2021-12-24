@@ -4,6 +4,7 @@
  */
 
 import axios, { AxiosError } from "axios";
+import { createHash } from "crypto";
 import * as fs from "fs";
 import DiscordNotification from "../discord/DiscordNotification";
 import S3Uploader from "../s3/S3Uploader";
@@ -170,8 +171,11 @@ export default abstract class Variant {
             // If the local version doesn't exist (newly released version), or if
             // the local version is outdated.
             if (!localVersion || !this.isUpToDate(localVersion, latestVersion)) {
+                // Console notification
+                console.log(`Updating ${this.name} ${versionName} to build ${latestVersion.build}`);
+
                 // The version is not up to date and needs to be updated.
-                this.downloadVersion(latestVersion);
+                await this.downloadVersion(latestVersion);
 
                 // Write version.json
                 this.writeVersionMeta(latestVersion);
@@ -195,9 +199,6 @@ export default abstract class Variant {
                         `${this.name} ${versionName} updated to build ${latestVersion.build}`
                     )
                 );
-
-                // Console notification
-                console.log(`Updated ${this.name} ${versionName} to build ${latestVersion.build}`);
             }
         }
 
@@ -211,25 +212,63 @@ export default abstract class Variant {
     }
 
     /**
-     * Download the version jar.
+     * Downloads the version jar and validates that it has the correct checksum hash
+     * if the version provides a hash.
      * 
      * @param version The version to download.
      */
     public async downloadVersion(version: Version) {
-        if (this.usesDownload()) {
-            const dir = this.variantPath + version.version;
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir);
-            }
-            const path = `${dir}/${this.id}-${version.version}.jar`;
-
-            if (Utils.isDebug()) {
-                fs.writeFileSync(path, "This is not a real JAR, don't use it for anything.");
-            } else {
-                await Utils.downloadFile(this.getDownloadLink(version), path);
-            }
+        const dir = this.variantPath + version.version;
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+        const path = `${dir}/${this.id}-${version.version}.jar`;
+        if (Utils.isDebug()) {
+            fs.writeFileSync(path, "This is not a real JAR, don't use it for anything.");
         } else {
-            throw new Error("Variant with id "+ this.id + " does not use downloads but has not overriden downloadVersion");
+            let attempts = 0;
+            while (attempts < 3) {
+                attempts++;
+
+                // Download
+                await this.downloadVersionJar(version, path);
+
+                // Validate hash
+                if (version.hash) {
+                    const hasher = createHash(version.hash.type);
+                    hasher.setEncoding("hex");
+                    hasher.write(fs.readFileSync(path));
+                    hasher.end();
+                    const foundHash = hasher.read();
+                    const expectedHash = version.hash.hash;
+                    if (foundHash == expectedHash) {
+                        console.log(`${this.name} ${version.version} updated successfully. (Hash matches)`);
+                        break; // stop while loop
+                    } else {
+                        console.warn(`Failed to update ${this.name} ${version.version}. Expected the ${version.hash.type} hash to be ${expectedHash} but found ${foundHash}. Attempt ${attempts}/3`);
+                        fs.unlinkSync(path);
+                    }
+                } else {
+                    console.log(`${this.name} ${version.version} updated.`);
+                    break; // stop while loop
+                }
+            }
+            if (attempts > 3) {
+                console.warn(`Failed to download ${this.name} ${version.version} after three attempts.`);
+            }
+        }
+    }
+
+    /**
+     * Download the version jar.
+     * 
+     * @param version The version to download.
+     */
+    public async downloadVersionJar(version: Version, path: string) {
+        if (this.usesDownload()) {
+            await Utils.downloadFile(this.getDownloadLink(version), path);
+        } else {
+            throw new Error("Variant with id "+ this.id + " does not use downloads but has not overriden downloadVersionJar");
         }
     }
 

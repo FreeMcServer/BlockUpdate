@@ -68,7 +68,6 @@ namespace Utils {
             }).then(function (response) {
                 response.data.pipe(fs.createWriteStream(destPath));
                 response.data.on('end', function () {
-                    console.log('File downloaded to ' + destPath);
                     resolve();
                 });
             }).catch(reject);

@@ -96,7 +96,7 @@ export default class Spigot extends Variant {
         throw new Error("Method not implemented.");
     }
 
-    public async downloadVersion(version: Version): Promise<void> {
+    public async downloadVersionJar(version: Version, _path: string): Promise<void> {
         // Create tmp dir
         if (!fs.existsSync(Utils.ROOT + 'tmp')) {
             fs.mkdirSync(Utils.ROOT + 'tmp');
@@ -104,6 +104,7 @@ export default class Spigot extends Variant {
         }
 
         // Create spigot dir
+        // Note that this should match the _path parameter.
         const spigotDir = this.variantPath + version.version + "/";
         if (!fs.existsSync(spigotDir)) {
             fs.mkdirSync(spigotDir);
@@ -128,8 +129,6 @@ export default class Spigot extends Variant {
             if (fs.existsSync(craftBukkitJar)) {
                 fs.unlinkSync(craftBukkitJar);
             }
-
-            this.hasChanges = true;
         } catch (e) {
             console.error(e);
             console.error("BuildTools failed to build " + version.version);

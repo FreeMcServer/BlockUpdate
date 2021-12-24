@@ -21,9 +21,6 @@ async function start() {
         fs.mkdirSync("./out");
     }
 
-    const spigot = new Spigot();
-    await spigot.update();
-
     const paper = new Paper();
     await paper.update();
 
@@ -32,6 +29,9 @@ async function start() {
 
     const purpur = new Purpur();
     await purpur.update();
+
+    const spigot = new Spigot();
+    await spigot.update();
 
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
         // Send pending messages
