@@ -8,3 +8,5 @@ import { Variant, rerun } from "./fix/manualFixImpl";
 //
 // Where "purpur" is one of: "paper", "purpur", "spigot" or "waterfall".
 //
+
+rerun("purpur", "1.18.1");

@@ -19,10 +19,6 @@ if (Utils.isDebug()) {
 }
 
 async function start() {
-    if (true) {
-        console.log("Temporarally stopping.");
-        return;
-    }
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
