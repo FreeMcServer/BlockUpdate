@@ -211,12 +211,13 @@ export default abstract class Variant {
             }
         }
 
+        await this.writeLocalVersions();
+
         // Upload to S3
         if (Utils.isUsingS3()) {
             this.uploadChanges();
         }
 
-        await this.writeLocalVersions();
         console.log(`${this.name} versions updated.`);
     }
 
