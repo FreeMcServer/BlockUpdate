@@ -33,4 +33,15 @@ export default class Discord {
         }
         this.pendingMessages = [];
     }
+
+    /**
+     * Send all pending messages to the console.
+     */
+    sendToConsole() {
+        for (const message of this.pendingMessages) {
+            console.log("--- " + message.title + " ---");
+            console.log(message.message);
+            console.log("------");
+        }
+    }
 }

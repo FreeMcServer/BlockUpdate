@@ -38,6 +38,8 @@ async function start() {
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true' && Utils.discord.hasPendingMessages()) {
         if (getReruns().length > 0) {
             console.log("Manual reruns have ran, skipping to send discord notifications.");
+            console.log("The following messages were skipped:");
+            Utils.discord.sendToConsole();
         } else {
             // Send pending messages
             Utils.discord.send();
