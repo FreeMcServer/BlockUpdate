@@ -59,14 +59,15 @@ Using the following format:
 ./out
 ├── spigot
 ├────── 1.14.4
-├────────── 1.14.4.jar
+├────────── spigot-1.14.4.jar
 ├────────── build.txt
+├────────── version.json
 ├────── versions.json
 ```
 
-There will be a directory with the name of the version, inside this directory will be a file called build.txt` (with the
-current build number for the JAR on the same folder), and a file called _VERSION_.jar with the version specific JAR
-file. There will also be a versions.json file with all the versions available along with some metadata for each version.
+There will be a directory with the name of the version, inside this directory will be a file called `build.txt` (with the
+current build number for the JAR on the same folder), and a file called _variant_-_version_.jar with the version specific JAR
+file. There will also be a versions.json file with all the versions available along with some metadata for each version. The version.json inside the version folder will also contain the same version metadata.
 
 ## Contributing
 
