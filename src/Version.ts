@@ -3,23 +3,24 @@
  * Copyright (c) 2021. FreeMCServer
  */
 
-export default class Version {
+export default interface Version {
     /** The game version. */
-    public readonly version: string;
+    version: string;
     /** Whether this version is a snapshot, pre release or release candidate. */
-    public readonly snapshot: boolean;
+    snapshot: boolean;
     /** The build number for this build. */
-    public readonly build: number;
-    /** The git hash for this build. */
-    public readonly ref: string;
+    build: number;
+    /** The an identifiable reference for for this build. (For example a git hash) */
+    ref: string;
     /** A list of compatible java versions. */
-    public readonly javaVersions: number[];
+    javaVersions: number[];
+    /** A hash of the jar file for this build. */
+    hash?: Hash;
+}
 
-    constructor(version: string, snapshot: boolean, build: number, ref: string, javaVersions: number[]) {
-        this.version = version;
-        this.snapshot = snapshot;
-        this.build = build;
-        this.ref = ref;
-        this.javaVersions = javaVersions;
-    }
+export type HashType = "md5" | "sha256";
+
+export interface Hash {
+    type: HashType;
+    hash: string;
 }

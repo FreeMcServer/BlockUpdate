@@ -5,12 +5,13 @@
 
 import axios from "axios";
 import fs from "fs";
-import Discord from "./Discord";
-import DiscordNotification from "./DiscordNotification";
+import Discord from "./discord/Discord";
 
 namespace Utils {
-    /** @deprecated */
-    export const pendingMessages: DiscordNotification[] = [];
+    /**
+     * The root directory where all variants are placed. Ends with a slash.
+     */
+    export const ROOT = "/root/app/";
 
     export const discord = new Discord();
 
@@ -67,7 +68,6 @@ namespace Utils {
             }).then(function (response) {
                 response.data.pipe(fs.createWriteStream(destPath));
                 response.data.on('end', function () {
-                    console.log('File downloaded to ' + destPath);
                     resolve();
                 });
             }).catch(reject);
@@ -97,14 +97,67 @@ namespace Utils {
         }
     }
 
+    /**
+     * Get the higest positive number in the array.
+     *
+     * @param numbers The array of numbers.
+     * @returns The highest number.
+     */
+    export function getHighestNumber(numbers: number[]): number {
+        let higest = -1;
+        for (const value of numbers) {
+            if (value > higest) {
+                higest = value;
+            }
+        }
+        return higest;
+    }
+
+    /**
+     * Get the lowest number in the array.
+     *
+     * @param numbers The array of numbers.
+     * @returns The lowest number.
+     */
+    export function getLowestNumber(numbers: number[]): number {
+        let lowest = Number.MAX_VALUE;
+        for (const value of numbers) {
+            if (value < lowest) {
+                lowest = value;
+            }
+        }
+        return lowest;
+    }
+
     // check if version is release
     export function isRelease(version: string): boolean {
-        return !version.includes('-') || version.split('.').length !== 0;
+        // If version doesnt incluide a "-" then true, and then if it has any dots in it, then true
+        return !version.includes('-') && version.split('.').length > 0;
+    }
+
+    export function isSnapshot(version: string): boolean {
+        return !Utils.isRelease(version);
     }
 
     // check if debug mode
     export function isDebug(): boolean {
         return process.env.DEBUG === 'true';
+    }
+
+    export function isUsingS3(): boolean {
+        return process.env.S3_UPLOAD === 'true';
+    }
+
+    export function getS3Endpoint(): string {
+        if (isUsingS3()) {
+            if (process.env.S3_ENDPOINT) {
+                return process.env.S3_ENDPOINT
+            } else {
+                throw Error("S3 Endpoint is undefined. Please set the S3 endpoint in the '.env' file.")
+            }
+        } else {
+            throw Error("Getting S3 Endpoint without having S3 enabled. Somethings gone wrong...");
+        }
     }
 }
 
