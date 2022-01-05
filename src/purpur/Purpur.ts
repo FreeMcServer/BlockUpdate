@@ -28,7 +28,7 @@ export default class Purpur extends Variant {
         const buildRes = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName + "/" + latestBuild);
 
         const isSnapshot = Utils.isSnapshot(versionName);
-        const ref = buildRes.data.commits[0].hash;
+        const ref = buildRes.data.commits[0] ? buildRes.data.commits[0].hash : this.id + "-" + versionName + "-" + latestBuild;
         const javaVersions: number[] = []; // TODO
         return {
             version: versionName,

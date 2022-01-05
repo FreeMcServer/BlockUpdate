@@ -28,7 +28,7 @@ export default class Waterfall extends Variant {
         const buildRes = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName + "/builds/" + latestBuild);
 
         const isSnapshot = Utils.isSnapshot(versionName);
-        const ref = buildRes.data.changes[0].commit;
+        const ref = buildRes.data.changes[0] ? buildRes.data.changes[0].commit : this.id + "-" + versionName + "-" + latestBuild;
         const javaVersions: number[] = []; // TODO
         return {
             version: versionName,
