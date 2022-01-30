@@ -7,38 +7,46 @@ import * as fs from "fs";
 import Purpur from "./purpur/Purpur";
 import Spigot from "./spigot/Spigot";
 import Paper from "./paper/Paper";
-import {MessageBuilder, Webhook} from "discord-webhook-node";
 import Utils from "./Utils";
+import Waterfall from "./waterfall/Waterfall";
+import { getReruns } from "./fix/manualFixImpl";
+import "./ManualFix";
+
+console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer");
+
+if (Utils.isDebug()) {
+    console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
+}
 
 async function start() {
-    console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer")
-
     if (!fs.existsSync("./out")) {
         fs.mkdirSync("./out");
     }
 
-    let spigot = new Spigot();
-    await spigot.init();
+    const paper = new Paper();
+    await paper.update();
 
-    let paper = new Paper();
-    await paper.init();
+    const waterfall = new Waterfall();
+    await waterfall.update();
 
-    let purpur = new Purpur();
-    await purpur.init();
-    if (process.env.DISCORD_WEBHOOK_ENABLE == 'true') {
-        const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL ?? '');
-        for (let msg in Utils.pendingMessages) {
-            const n = Utils.pendingMessages[msg];
-            const embed = new MessageBuilder()
-                .setTitle(n.title)
-                .setColor(2621184)
-                .setDescription(n.message)
-                .setTimestamp();
-            hook.send(embed).then(r => console.log(r)).catch(e => console.log(e));
+    const purpur = new Purpur();
+    await purpur.update();
+
+    const spigot = new Spigot();
+    await spigot.update();
+
+    if (process.env.DISCORD_WEBHOOK_ENABLE == 'true' && Utils.discord.hasPendingMessages()) {
+        if (getReruns().length > 0) {
+            console.log("Manual reruns have ran, skipping to send discord notifications.");
+            console.log("The following messages were skipped:");
+            Utils.discord.sendToConsole();
+        } else {
+            // Send pending messages
+            Utils.discord.send();
         }
     }
+
     console.log("Done!");
 }
-
 
 start();

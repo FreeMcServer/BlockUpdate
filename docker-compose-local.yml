@@ -1,0 +1,9 @@
+version: '3.4'
+services:
+  version-updater:
+    build: .
+    env_file:
+      - .env
+    command: "node_modules/.bin/nodemon --watch src ./src/index.ts"
+    volumes:
+      - ./:/root/app

@@ -8,23 +8,24 @@ import Utils from "../Utils";
 import Version from "../Version";
 import Variant from "../variant/Variant";
 
-export default class Paper extends Variant {
+// Waterfall Proxy
+export default class Waterfall extends Variant {
     constructor() {
-        super("paper", "Paper");
+        super("waterfall", "Waterfall");
     }
 
     public async getLatestVersions(): Promise<string[]> {
-        const res = await axios.get("https://papermc.io/api/v2/projects/paper/");
+        const res = await axios.get("https://papermc.io/api/v2/projects/waterfall");
         return res.data.versions;
     }
 
     public async getLatestBuild(versionName: string): Promise<Version> {
-        const res = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName);
+        const res = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName);
         let json = res.data;
 
         const latestBuild = Utils.getHighestNumber(json.builds);
 
-        const buildRes = await axios.get("https://papermc.io/api/v2/projects/paper/versions/" + versionName + "/builds/" + latestBuild);
+        const buildRes = await axios.get("https://papermc.io/api/v2/projects/waterfall/versions/" + versionName + "/builds/" + latestBuild);
 
         const isSnapshot = Utils.isSnapshot(versionName);
         const ref = buildRes.data.changes[0] ? buildRes.data.changes[0].commit : this.id + "-" + versionName + "-" + latestBuild;
@@ -47,6 +48,6 @@ export default class Paper extends Variant {
     }
 
     public getDownloadLink(version: Version): string {
-        return `https://papermc.io/api/v2/projects/paper/versions/${version.version}/builds/${version.build}/downloads/paper-${version.version}-${version.build}.jar`;
+        return `https://papermc.io/api/v2/projects/waterfall/versions/${version.version}/builds/${version.build}/downloads/waterfall-${version.version}-${version.build}.jar`;
     }
 }

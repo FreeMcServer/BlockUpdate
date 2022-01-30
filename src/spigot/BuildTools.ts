@@ -5,32 +5,25 @@
 
 import * as fs from "fs";
 import axios from "axios";
+import Utils from "../Utils";
 
-class BuildTools {
-    private buildToolsApi: string = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json";
-    private readonly buildToolsVersion: string;
-
-    constructor() {
-        this.buildToolsVersion = BuildTools.getBuildToolsVersion();
-    }
-
-    private static getBuildToolsVersion(): string {
+export default class BuildTools {
+    private getBuildToolsVersion(): number {
         let exists: boolean = fs.existsSync(`/root/app/out/buildtools/.version`);
         if (exists) {
-            return fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8");
+            return Number.parseInt(fs.readFileSync(`/root/app/out/buildtools/.version`, "utf8"));
         } else {
-            return "0";
+            return 0;
         }
     }
 
-    public async init() {
-        await this.updateBuildTools();
-    }
+    public async update(): Promise<void> {
+        const response = await axios.get("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/api/json");
 
-    private async updateBuildTools(): Promise<void> {
-        const response = await axios.get(this.buildToolsApi);
-        let latestVersion = response.data.id as string;
-        if (latestVersion <= this.buildToolsVersion) {
+        const currentVersion = this.getBuildToolsVersion();
+        const latestVersion = Number.parseInt(response.data.id);
+
+        if (latestVersion <= currentVersion) {
             console.log("BuildTools is up to date");
         } else {
             console.log("BuildTools is outdated, updating...");
@@ -38,10 +31,9 @@ class BuildTools {
         }
     }
 
-    private async downloadBuildTools(version: string): Promise<void> {
-        let buildToolsUrl = `https://hub.spigotmc.org/jenkins/job/BuildTools/${version}/artifact/target/BuildTools.jar`;
-        let buildToolsPath = `/root/app/out/buildtools/BuildTools.jar`;
-        let buildToolsDir = `/root/app/out/buildtools`;
+    private async downloadBuildTools(version: number): Promise<void> {
+        const buildToolsPath = `/root/app/out/buildtools/BuildTools.jar`;
+        const buildToolsDir = `/root/app/out/buildtools`;
 
         if (!fs.existsSync(buildToolsDir)) {
             fs.mkdirSync(buildToolsDir);
@@ -51,21 +43,8 @@ class BuildTools {
             fs.unlinkSync(buildToolsPath);
         }
 
-        const response = await axios.get(buildToolsUrl, {
-            responseType: 'stream'
-        });
-        const promise = new Promise<void>(function (resolve) {
-            response.data.pipe(fs.createWriteStream(buildToolsPath));
-            response.data.on('end', () => {
-                console.log("BuildTools downloaded");
-                fs.writeSync(fs.openSync(`/root/app/out/buildtools/.version`, 'w'), version);
-                resolve();
-            });
-        });
-
-        // Wait for the download
-        await promise;
+        await Utils.downloadFile(`https://hub.spigotmc.org/jenkins/job/BuildTools/${version}/artifact/target/BuildTools.jar`, buildToolsPath);
+        fs.writeFileSync("/root/app/out/buildtools/.version", version.toString());
+        console.log("BuildTools downloaded");
     }
 }
-
-export default BuildTools;

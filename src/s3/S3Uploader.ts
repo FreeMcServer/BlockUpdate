@@ -3,7 +3,7 @@
  * Copyright (c) 2021. FreeMCServer
  */
 
-import {execSync} from "child_process";
+import { execSync } from "child_process";
 
 
 class S3Uploader {

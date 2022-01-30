@@ -7,65 +7,42 @@ import BuildTools from "./BuildTools";
 import * as fs from "fs";
 import axios from "axios";
 import Utils from "../Utils";
-import SpigotVersion from "./SpigotVersion";
-import {execSync} from "child_process";
-import S3Uploader from "../s3/S3Uploader";
-import DiscordNotification from "../DiscordNotification";
+import Version from "../Version";
+import { execSync } from "child_process";
+import SpigotVersionJson from "./SpigotVersionJson";
+import Variant from "../variant/Variant";
 
-// Spigot and Craftbukkit getter
-class Spigot {
-    public spigotVersions?: SpigotVersion[];
-    public craftBukkitVersions?: SpigotVersion[];
-    private bt?: BuildTools;
-    private utils: Utils;
-    private hasChanged = false;
+interface SpigotLocalVersions {
+    spigot: Version[];
+    craftbukkit: Version[];
+}
 
+/**
+ * Version updater for Spigot and CraftBukkit.
+ */
+export default class Spigot extends Variant {
     constructor() {
-        if (!fs.existsSync("/root/app/out/spigot")) {
-            fs.mkdirSync("/root/app/out/spigot");
-        }
-        if (!fs.existsSync("/root/app/out/craftbukkit")) {
-            fs.mkdirSync("/root/app/out/craftbukkit");
-        }
-        this.utils = new Utils();
+        super("spigot", "Spigot");
     }
 
-    private static async getLocalVersions(): Promise<{ spigot: Array<SpigotVersion>, craftbukkit: Array<SpigotVersion> }> {
-        let existsSpigot = fs.existsSync('/root/app/out/spigot/versions.json');
-        let existsCraftbukkit = fs.existsSync('/root/app/out/craftbukkit/versions.json');
-        let spigotVersions: Array<SpigotVersion> = [];
-        let craftBukkitVersions: Array<SpigotVersion> = [];
+    public async update() {
+        // Ensure buildtools is up to date before updating the variant
+        const buildTools = new BuildTools();
+        await buildTools.update();
 
-
-        if (existsSpigot) {
-            spigotVersions = JSON.parse(fs.readFileSync('/root/app/out/spigot/versions.json', 'utf8'));
-        } else {
-            if (process.env.S3_UPLOAD === "true") {
-                let rx = await axios.get(process.env.S3_PULL_BASE + '/spigot/versions.json');
-                fs.writeFileSync('/root/app/out/spigot/versions.json', JSON.stringify(rx.data));
-                spigotVersions = JSON.parse(fs.readFileSync('/root/app/out/spigot/versions.json', 'utf8'));
-                console.log('Updated spigot versions from remote server');
-            }
-        }
-        if (existsCraftbukkit) {
-            craftBukkitVersions = JSON.parse(fs.readFileSync('/root/app/out/craftbukkit/versions.json', 'utf8'));
-        }
-        return {spigot: spigotVersions, craftbukkit: craftBukkitVersions};
-
+        // Update variant
+        await super.update();
     }
 
-    public async init() {
-        this.bt = new BuildTools();
-        await this.bt.init();
-
-        const versions = await Spigot.getLocalVersions();
-        this.spigotVersions = versions.spigot;
-        this.craftBukkitVersions = versions.craftbukkit;
-        await this.updateVersions();
-        console.log("Spigot and Craftbukkit versions updated");
-    }
-
-    private async updateVersions() {
+    public async getLatestVersions(): Promise<string[]> {
+        // Get versions by reading the html.
+        // Versions will have the following format:
+        //
+        // <a href="1.8.json">1.8.json</a>
+        //
+        // There are also builds so they have to be filtered out by
+        // only finding versions that start with "1.".
+        //
         const res = await axios.get("https://hub.spigotmc.org/versions/");
         const data = res.data as string;
         const latestVersions = data.split("\n")
@@ -73,91 +50,90 @@ class Spigot {
             .map(line => line.split('"')[1])
             .map(line => line.replace('.json', ''))
             .sort(Utils.sortVersions);
-        for (const versionName of latestVersions) {
-            const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
-            let json = res.data;
-            let spigotDir = "/root/app/out/spigot/" + versionName + "/"
-            if (!fs.existsSync(spigotDir)) {
-                fs.mkdirSync(spigotDir);
-            }
-            const buildLabelPath = '/root/app/out/spigot/' + versionName + '/build.txt';
-            if (fs.existsSync(buildLabelPath)) {
-                fs.unlinkSync(buildLabelPath);
-            }
-            fs.writeFileSync(buildLabelPath, json.refs.Spigot);
-            if (!this.spigotVersions!.find((v: SpigotVersion) => v.ref === json.refs.Spigot)) {
-                // @ts-ignore
-                this.spigotVersions = this.spigotVersions!.filter((v: SpigotVersion) => v.version !== versionName)
-                Utils.pendingMessages.push(new DiscordNotification(`Spigot ${versionName} updated!`, `SpigotC ${versionName} update to build \`${json.refs.Spigot}\`!`));
-                let javaVersionName: string;
-                let javaVersions: number[];
-                if (!json.javaVersions) {
-                    javaVersions = [52];
-                    javaVersionName = "8";
-                } else {
-                    javaVersions = json.javaVersions.map((javaVersion: string) => parseInt(javaVersion));
-                    javaVersionName = this.utils.getJavaVersion(javaVersions.sort((a, b) => a > b ? a : b)[0]);
-                }
 
-                //create tmp dir
-                if (!fs.existsSync('/root/app/tmp')) {
-                    fs.mkdirSync('/root/app/tmp');
-                    console.log("Created tmp dir");
-                }
-
-                let tmpDir = fs.mkdtempSync('/root/app/tmp/', 'utf-8');
-                let spigotDir = "/root/app/out/spigot/" + versionName + "/"
-                if (!fs.existsSync(spigotDir)) {
-                    fs.mkdirSync(spigotDir);
-                }
-                let craftbukkitDir = "/root/app/out/craftbukkit/" + versionName + "/"
-                if (!fs.existsSync(craftbukkitDir)) {
-                    fs.mkdirSync(craftbukkitDir);
-                }
-                console.log("Updating version: " + versionName);
-
-                // if debug mode, don't download, otherwise do.
-                if (this.utils.isDebug()) {
-                    console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
-                    fs.writeFileSync(spigotDir + "spigot-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
-                    fs.writeFileSync(craftbukkitDir + "craftbukkit-" + versionName + ".jar", 'This is not a real JAR, don\'t use it for anything.');
-                } else {
-                    try {
-                        await execSync('cd ' + tmpDir + ' && /usr/lib/jvm/java-' + javaVersionName + '-openjdk-amd64/bin/java -jar /root/app/out/buildtools/BuildTools.jar --rev ' + versionName + ' --output-dir ' + spigotDir + ' && rm -rf ' + tmpDir, {stdio: 'ignore'});
-                        if (fs.existsSync(spigotDir + 'craftbukkit-' + versionName + '.jar')) {
-                            fs.cpSync(spigotDir + 'craftbukkit-' + versionName + '.jar', '/root/app/out/craftbukkit/craftbukkit-' + versionName + '.jar');
-                        }
-                        // fs.unlinkSync(tmpDir);
-                        this.hasChanged = true;
-                        fs.writeFileSync("/root/app/out/spigot/versions.json", JSON.stringify(this.spigotVersions));
-                        fs.writeFileSync("/root/app/out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
-                    } catch (e) {
-                        console.log(e);
-                        console.log("Well, it crashed");
-                        let a = await execSync('cd ' + tmpDir + ' tail -n 20 /root/app/out/buildtools/BuildTools.log.txt');
-                        console.log(a.toString());
-                    }
-
-                }
-                let isSnapshot = !this.utils.isRelease(versionName);
-                let spigotVersion = new SpigotVersion(versionName, isSnapshot, json.name, javaVersions, json.refs.Spigot);
-                this.spigotVersions!.push(spigotVersion);
-
-                let craftBukkitVersion = new SpigotVersion(versionName, isSnapshot, json.name, javaVersions, json.refs.CraftBukkit);
-                this.craftBukkitVersions!.push(craftBukkitVersion);
-            }
-        }
-
-        fs.writeFileSync("/root/app/out/spigot/versions.json", JSON.stringify(this.spigotVersions));
-        fs.writeFileSync("/root/app/out/craftbukkit/versions.json", JSON.stringify(this.craftBukkitVersions));
-        console.log("Spigot and Craftbukkit versions updated");
-        if (this.hasChanged) {
-            console.log("Uploading Spigot");
-            let uploader = new S3Uploader()
-            await uploader.syncS3Storage('/root/app/out/spigot/', 'jar/spigot');
-        }
+        return latestVersions;
     }
 
-}
+    public async getLatestBuild(versionName: string): Promise<Version> {
+        const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
+        const json = res.data as SpigotVersionJson;
 
-export default Spigot;
+        // Find Java version
+        let javaVersionName: string;
+        let javaVersions: number[];
+        if (!json.javaVersions) {
+            // Default to Java 8 if nothing is specified.
+            javaVersions = [52];
+            javaVersionName = "8";
+        } else {
+            javaVersions = json.javaVersions;
+            const minJavaVersion = Utils.getLowestNumber(javaVersions);
+            javaVersionName = Utils.getJavaVersion(minJavaVersion);
+        }
+
+        const isSnapshot = Utils.isSnapshot(versionName);
+        const build = Number.parseInt(json.name);
+        return {
+            version: versionName,
+            snapshot: isSnapshot,
+            build: build,
+            ref: json.refs.Spigot,
+            javaVersions: javaVersions
+        };
+    }
+
+    public isUpToDate(localVersion: Version, remoteVersion: Version): boolean {
+        return localVersion.version == remoteVersion.version
+        && localVersion.ref == remoteVersion.ref;
+    }
+
+    public usesDownload(): boolean {
+        return false;
+    }
+
+    public getDownloadLink(version: Version): string {
+        // Spigot uses buildtools instead of downloads via a URL
+        throw new Error("Method not implemented.");
+    }
+
+    public async downloadVersionJar(version: Version, _path: string): Promise<void> {
+        // Create tmp dir
+        if (!fs.existsSync(Utils.ROOT + 'tmp')) {
+            fs.mkdirSync(Utils.ROOT + 'tmp');
+            console.log("Created tmp dir");
+        }
+
+        // Create spigot dir
+        // Note that this should match the _path parameter.
+        const spigotDir = this.variantPath + version.version + "/";
+        if (!fs.existsSync(spigotDir)) {
+            fs.mkdirSync(spigotDir);
+        }
+
+        const tmpDir = fs.mkdtempSync(Utils.ROOT + 'tmp/', 'utf-8');
+        const javaVersionName = Utils.getJavaVersion(version.javaVersions[0]);
+
+        console.log("Running BuildTools for Spigot version " + version.version + ". This might take a while.");
+
+        try {
+            // Run BuildTools to build the jar
+            await execSync(`cd ${tmpDir} ` +
+                `&& /usr/lib/jvm/java-${javaVersionName}-openjdk-amd64/bin/java ` +
+                    '-jar /root/app/out/buildtools/BuildTools.jar ' +
+                    `--rev ${version.version} ` +
+                    `--output-dir ${spigotDir} ` +
+                '&& rm -rf ' + tmpDir,
+                { stdio: 'ignore' });
+
+            const craftBukkitJar = spigotDir + 'craftbukkit-' + version.version + '.jar';
+            if (fs.existsSync(craftBukkitJar)) {
+                fs.unlinkSync(craftBukkitJar);
+            }
+        } catch (e) {
+            console.error(e);
+            console.error("BuildTools failed to build " + version.version);
+            const buildToolsLog = await execSync('cd ' + tmpDir + ' tail -n 20 /root/app/out/buildtools/BuildTools.log.txt');
+            console.error(buildToolsLog.toString());
+        }
+    }
+}

@@ -5,13 +5,18 @@
 
 import axios from "axios";
 import fs from "fs";
-import DiscordNotification from "./DiscordNotification";
+import Discord from "./discord/Discord";
 
-class Utils {
-    public static pendingMessages: DiscordNotification[] = [];
+namespace Utils {
+    /**
+     * The root directory where all variants are placed. Ends with a slash.
+     */
+    export const ROOT = "/root/app/";
+
+    export const discord = new Discord();
 
     // sort minecraft versions TODO: this doesnt work
-    public static sortVersions(a: string, b: string): number {
+    export function sortVersions(a: string, b: string): number {
         const aSplit: Array<string> = a.split('.');
         const bSplit: Array<string> = b.split('.');
         for (let i = 0; i < aSplit.length; i++) {
@@ -50,7 +55,7 @@ class Utils {
         return 0;
     }
 
-    public static downloadFile(fileUrl: string, destPath: string) {
+    export function downloadFile(fileUrl: string, destPath: string) {
 
         if (!fileUrl) return Promise.reject(new Error('Invalid fileUrl'));
         if (!destPath) return Promise.reject(new Error('Invalid destPath'));
@@ -63,46 +68,96 @@ class Utils {
             }).then(function (response) {
                 response.data.pipe(fs.createWriteStream(destPath));
                 response.data.on('end', function () {
-                    console.log('File downloaded to ' + destPath);
                     resolve();
                 });
-            }).catch(function (error) {
-                reject(error);
-            });
+            }).catch(reject);
         });
     }
 
     // class version to java version
-    public getJavaVersion(classVersion: number): string {
-        let javaMap: { [key: number]: string } = {
-            46: '1.2.0',
-            47: '1.3.0',
-            48: '1.4.0',
-            49: '1.5.0',
-            50: '1.6.0',
-            51: '1.7.0', // Everything 7 and below doesnt matter.
-            52: '8',
-            53: '9',
-            54: '10',
-            55: '11',
-            56: '12',
-            57: '13',
-            58: '14',
-            59: '15',
-            60: '16',
-            61: '17',
-        };
-        return javaMap[classVersion];
+    export function getJavaVersion(classVersion: number): string {
+        switch (classVersion) {
+            case 46: return '1.2.0';
+            case 47: return '1.3.0';
+            case 48: return '1.4.0';
+            case 49: return '1.5.0';
+            case 50: return '1.6.0';
+            case 51: return '1.7.0'; // Everything 7 and below doesnt matter.
+            case 52: return '8';
+            case 53: return '9';
+            case 54: return '10';
+            case 55: return '11';
+            case 56: return '12';
+            case 57: return '13';
+            case 58: return '14';
+            case 59: return '15';
+            case 60: return '16';
+            case 61: return '17';
+            default: return "Unknown Java Version";
+        }
+    }
+
+    /**
+     * Get the higest positive number in the array.
+     *
+     * @param numbers The array of numbers.
+     * @returns The highest number.
+     */
+    export function getHighestNumber(numbers: number[]): number {
+        let higest = -1;
+        for (const value of numbers) {
+            if (value > higest) {
+                higest = value;
+            }
+        }
+        return higest;
+    }
+
+    /**
+     * Get the lowest number in the array.
+     *
+     * @param numbers The array of numbers.
+     * @returns The lowest number.
+     */
+    export function getLowestNumber(numbers: number[]): number {
+        let lowest = Number.MAX_VALUE;
+        for (const value of numbers) {
+            if (value < lowest) {
+                lowest = value;
+            }
+        }
+        return lowest;
     }
 
     // check if version is release
-    public isRelease(version: string): boolean {
-        return !version.includes('-') || version.split('.').length !== 0;
+    export function isRelease(version: string): boolean {
+        // If version doesnt incluide a "-" then true, and then if it has any dots in it, then true
+        return !version.includes('-') && version.split('.').length > 0;
+    }
+
+    export function isSnapshot(version: string): boolean {
+        return !Utils.isRelease(version);
     }
 
     // check if debug mode
-    public isDebug(): boolean {
+    export function isDebug(): boolean {
         return process.env.DEBUG === 'true';
+    }
+
+    export function isUsingS3(): boolean {
+        return process.env.S3_UPLOAD === 'true';
+    }
+
+    export function getS3Endpoint(): string {
+        if (isUsingS3()) {
+            if (process.env.S3_ENDPOINT) {
+                return process.env.S3_ENDPOINT
+            } else {
+                throw Error("S3 Endpoint is undefined. Please set the S3 endpoint in the '.env' file.")
+            }
+        } else {
+            throw Error("Getting S3 Endpoint without having S3 enabled. Somethings gone wrong...");
+        }
     }
 }
 
