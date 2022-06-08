@@ -145,7 +145,7 @@ export default abstract class Variant {
      * 
      * @param versionName The version
      */
-    public abstract getLatestBuild(versionName: string): Promise<Version>;
+    public abstract getLatestBuild(versionName: string): Promise<Version | null>;
     
     /**
      * Whether this variant uses a download link to update variants.
@@ -174,6 +174,9 @@ export default abstract class Variant {
         // Loop trough all versions
         for (const versionName of latestVersionNames) {
             const latestVersion = await this.getLatestBuild(versionName);
+            if (latestVersion == null) {
+                continue;
+            }
             
             const localVersion = this.localVersions.find(v => v.version === versionName);
 

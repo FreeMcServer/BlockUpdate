@@ -19,7 +19,7 @@ export default class Purpur extends Variant {
         return res.data.versions;
     }
 
-    public async getLatestBuild(versionName: string): Promise<Version> {
+    public async getLatestBuild(versionName: string): Promise<Version | null> {
         const res = await axios.get("https://api.purpurmc.org/v2/purpur/" + versionName);
         let json = res.data;
         

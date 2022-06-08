@@ -19,11 +19,14 @@ export default class Waterfall extends Variant {
         return res.data.versions;
     }
 
-    public async getLatestBuild(versionName: string): Promise<Version> {
+    public async getLatestBuild(versionName: string): Promise<Version | null> {
         const res = await axios.get("https://api.papermc.io/v2/projects/waterfall/versions/" + versionName);
         let json = res.data;
 
         const latestBuild = Utils.getHighestNumber(json.builds);
+        if (latestBuild == null) {
+            return null;
+        }
 
         const buildRes = await axios.get("https://api.papermc.io/v2/projects/waterfall/versions/" + versionName + "/builds/" + latestBuild);
 
