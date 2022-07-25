@@ -8,6 +8,9 @@ import Utils from "../Utils";
 import Version from "../Version";
 import Variant from "../variant/Variant";
 
+interface MohistVersion extends Version {
+        downloadUrl: string;}
+
 // MohistMC
 export default class Mohist extends Variant {
     constructor() {
@@ -19,7 +22,7 @@ export default class Mohist extends Variant {
         return res
     }
 
-    public async getLatestBuild(versionName: string): Promise<Version | null> {
+    public async getLatestBuild(versionName: string): Promise<MohistVersion | null> {
         const res = await axios.get("https://mohistmc.com/api/"+ versionName + "/latest");
         const json = res.data;
 
@@ -34,9 +37,10 @@ export default class Mohist extends Variant {
             build: latestBuild,
             ref: ref,
             javaVersions: javaVersions,
-            hash: {
-                type: "md5",
-                hash: json.md5
+            downloadUrl: json.url,
+             hash: {
+                 type: "md5",
+                 hash: json.md5
             }
         };
     }
@@ -46,8 +50,7 @@ export default class Mohist extends Variant {
     }
 
     public getDownloadLink(version: Version): string {
-        const res = axios.get("https://mohistmc.com/api/"+ version + "/latest");
-        const download = res.data;
-        return download.url
+        const mohistVersion = version as MohistVersion;
+        return mohistVersion.downloadUrl;
     }
 }
