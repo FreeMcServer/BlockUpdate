@@ -54,7 +54,7 @@ export default class Spigot extends Variant {
         return latestVersions;
     }
 
-    public async getLatestBuild(versionName: string): Promise<Version> {
+    public async getLatestBuild(versionName: string): Promise<Version | null> {
         const res = await axios.get("https://hub.spigotmc.org/versions/" + versionName + ".json");
         const json = res.data as SpigotVersionJson;
 

@@ -99,18 +99,23 @@ namespace Utils {
 
     /**
      * Get the higest positive number in the array.
+     * 
+     * Will return null if the array is empty.
      *
      * @param numbers The array of numbers.
-     * @returns The highest number.
+     * @returns The highest number. Or null.
      */
-    export function getHighestNumber(numbers: number[]): number {
-        let higest = -1;
+    export function getHighestNumber(numbers: number[]): number | null {
+        if (numbers.length == 0) {
+            return null;
+        }
+        let highest = -1;
         for (const value of numbers) {
-            if (value > higest) {
-                higest = value;
+            if (value > highest) {
+                highest = value;
             }
         }
-        return higest;
+        return highest;
     }
 
     /**
