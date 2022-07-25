@@ -7,7 +7,7 @@ import * as fs from "fs";
 import Purpur from "./purpur/Purpur";
 import Spigot from "./spigot/Spigot";
 import Paper from "./paper/Paper";
-import Mohist from "./mohist/Mohist"
+import Mohist from "./mohist/Mohist";
 import Utils from "./Utils";
 import Waterfall from "./waterfall/Waterfall";
 import { getReruns } from "./fix/manualFixImpl";
