@@ -1,6 +1,5 @@
-FROM ubuntu:21.10
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get dist-upgrade -y
 RUN apt-get update -y && apt-get install -y curl software-properties-common python3 python3-pip
 RUN pip3 install s3cmd
 RUN apt-get update -y
