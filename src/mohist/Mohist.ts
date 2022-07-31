@@ -21,7 +21,6 @@ export default class Mohist extends Variant {
         const res = ["1.16.5","1.12.2", "1.7.10"]
         return res
     }
-
     public async getLatestBuild(versionName: string): Promise<MohistVersion | null> {
         const res = await axios.get("https://mohistmc.com/api/"+ versionName + "/latest");
         const json = res.data;
@@ -37,7 +36,7 @@ export default class Mohist extends Variant {
             build: latestBuild,
             ref: ref,
             javaVersions: javaVersions,
-            downloadUrl: json.url,
+            downloadUrl: json.mirror,
              hash: {
                  type: "md5",
                  hash: json.md5
