@@ -8,6 +8,7 @@ import Purpur from "./purpur/Purpur";
 import Spigot from "./spigot/Spigot";
 import Paper from "./paper/Paper";
 import Mohist from "./mohist/Mohist";
+import Magma from "./magma/Magma";
 import Utils from "./Utils";
 import Waterfall from "./waterfall/Waterfall";
 import { getReruns } from "./fix/manualFixImpl";
@@ -38,6 +39,9 @@ async function start() {
 
     const mohist = new Mohist();
     await mohist.update();
+
+    const magma = new Magma();
+    await magma.update();
 
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true' && Utils.discord.hasPendingMessages()) {
         if (getReruns().length > 0) {
