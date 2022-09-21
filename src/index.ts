@@ -11,10 +11,10 @@ import Mohist from "./mohist/Mohist";
 import Magma from "./magma/Magma";
 import Utils from "./Utils";
 import Waterfall from "./waterfall/Waterfall";
-import { getReruns } from "./fix/manualFixImpl";
+import {getReruns} from "./fix/manualFixImpl";
 import "./ManualFix";
 
-console.log("<BlockUpdate>  Copyright (C) 2021  FreeMCServer");
+console.log("<BlockUpdate>  Copyright (C) 2022  FreeMCServer");
 
 if (Utils.isDebug()) {
     console.log("Debug mode, not building. Please note that jars are not real, and are simply for testing.");
