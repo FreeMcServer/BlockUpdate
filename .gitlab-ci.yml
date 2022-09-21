@@ -24,9 +24,9 @@ docker-build:
   only:
   - master
 deploy:
-  image: 
+  image:
     name: "$CI_REGISTRY_IMAGE:master"
-    #pull_policy: always
+    pull_policy: always
   stage: deploy
   script:
   - export DEBUG=false
