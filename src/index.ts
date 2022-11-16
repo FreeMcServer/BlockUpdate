@@ -37,8 +37,8 @@ async function start() {
     const spigot = new Spigot();
     await spigot.update();
 
-    //const mohist = new Mohist();
-    //await mohist.update();
+    const mohist = new Mohist();
+    await mohist.update();
 
     // Not needed for now, uncomment if needed
     //const magma = new Magma();
