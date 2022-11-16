@@ -37,11 +37,12 @@ async function start() {
     const spigot = new Spigot();
     await spigot.update();
 
-    const mohist = new Mohist();
-    await mohist.update();
+    //const mohist = new Mohist();
+    //await mohist.update();
 
-    const magma = new Magma();
-    await magma.update();
+    // Not needed for now, uncomment if needed
+    //const magma = new Magma();
+    //await magma.update();
 
     if (process.env.DISCORD_WEBHOOK_ENABLE == 'true' && Utils.discord.hasPendingMessages()) {
         if (getReruns().length > 0) {
