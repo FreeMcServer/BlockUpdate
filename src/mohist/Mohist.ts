@@ -36,7 +36,7 @@ export default class Mohist extends Variant {
             build: latestBuild,
             ref: ref,
             javaVersions: javaVersions,
-            downloadUrl: json.mirror,
+            downloadUrl: json.url,
              hash: {
                  type: "md5",
                  hash: json.md5
