@@ -18,7 +18,7 @@ export default class Mohist extends Variant {
     }
 
     public async getLatestVersions(): Promise<string[]> {
-        const res = ["1.16.5","1.12.2", "1.7.10"]
+        const res = ["1.19.4","1.16.5","1.12.2", "1.7.10"]
         return res
     }
     public async getLatestBuild(versionName: string): Promise<MohistVersion | null> {
