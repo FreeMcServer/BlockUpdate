@@ -1,27 +1,31 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -y && apt-get install -y curl software-properties-common python3 python3-pip
-RUN pip3 install s3cmd
-RUN apt-get update -y
-RUN apt-get install openjdk-8-jdk -y
-RUN apt-get install openjdk-11-jdk -y
-RUN apt-get install openjdk-17-jdk -y
-RUN apt-get install openjdk-21-jdk -y
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
-RUN apt-get install build-essential nodejs -y
-RUN echo -e '/usr/lib/jvm/java-8-openjdk-amd64/bin/java "$@"' > /usr/bin/java8 && \
-    chmod +x /usr/bin/java8
-RUN echo -e '/usr/lib/jvm/java-11-openjdk-amd64/bin/java "$@"' > /usr/bin/java11 && \
-    chmod +x /usr/bin/java11
-RUN echo -e '/usr/lib/jvm/java-17-openjdk-amd64/bin/java "$@"' > /usr/bin/java17 && \
-    chmod +x /usr/bin/java17
-RUN echo -e '/usr/lib/jvm/java-21-openjdk-amd64/bin/java "$@"' > /usr/bin/java21 && \
-    chmod +x /usr/bin/java21
-RUN apt-get install -y maven git # pretty sure these are needed for building spigot
+RUN apt-get update -y \
+    && apt-get install -y \
+        curl \
+        software-properties-common \
+        python3 \
+        python3-pip \
+        openjdk-8-jdk \
+        openjdk-11-jdk \
+        openjdk-17-jdk \
+        openjdk-21-jdk \
+        build-essential \
+        git \
+        maven \
+    && pip3 install s3cmd \
+    && curl -sL https://deb.nodesource.com/setup_21.x | bash - \
+    && apt autoremove -y \
+    && apt install -y nodejs
 
+RUN update-alternatives --install /usr/bin/java8 java8 /usr/lib/jvm/java-8-openjdk-amd64/bin/java 1 \
+    && update-alternatives --install /usr/bin/java11 java11 /usr/lib/jvm/java-11-openjdk-amd64/bin/java 2 \
+    && update-alternatives --install /usr/bin/java17 java17 /usr/lib/jvm/java-17-openjdk-amd64/bin/java 3 \
+    && update-alternatives --install /usr/bin/java21 java21 /usr/lib/jvm/java-21-openjdk-amd64/bin/java 4
 
 COPY . /root/app
 WORKDIR /root/app
-RUN rm -rf dist/* && rm -rf out/*
-RUN npm install
+
+RUN rm -rf dist/* out/* \
+    && npm install
 CMD ["npm", "run", "run"]
