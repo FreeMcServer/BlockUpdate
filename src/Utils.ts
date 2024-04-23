@@ -93,6 +93,7 @@ namespace Utils {
             case 59: return '15';
             case 60: return '16';
             case 61: return '17';
+            case 65: return '21';
             default: return "Unknown Java Version";
         }
     }
