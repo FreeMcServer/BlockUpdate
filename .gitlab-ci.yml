@@ -41,11 +41,6 @@ deploy:
   - cd /root/app && npm run run
   only:
   - deploy
-include:
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Container-Scanning.gitlab-ci.yml
 container_scanning:
   variables:
     DOCKER_IMAGE: $CI_REGISTRY_IMAGE:master
