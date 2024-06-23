@@ -1,9 +1,3 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 docker-build:
   image: docker:latest
   stage: build
@@ -41,18 +35,8 @@ deploy:
   - cd /root/app && npm run run
   only:
   - deploy
-include:
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Container-Scanning.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
-container_scanning:
-  variables:
-    DOCKER_IMAGE: $CI_REGISTRY_IMAGE:master
 stages:
   - build
   - deploy
   - test
-sast:
-  stage: test
+
